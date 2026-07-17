@@ -1,0 +1,45 @@
+meta:
+  tone: "落ち着いた暖色ニュートラル。長文の日本語リリースノートを読み下すことが主目的なので、装飾は最小限にして本文の可読性を最優先する"
+  naming: "用途ベース（role-based）。値ベースの命名（blue-500 等）はしない"
+
+color:
+  primary:
+    value: "#C15F3C"
+    description: "アクセント（メールヘッダーの帯、バージョン見出し、リンク）。広い面の背景には使わない"
+  canvas:
+    value: "#F4F1EC"
+    description: "メール全体の背景。コンテンツカードの外側にのみ使う。テキストを直接載せない"
+  surface:
+    value: "#FFFFFF"
+    description: "コンテンツカード（リリースノート本文領域）の背景"
+  on-surface:
+    value: "#2B2620"
+    description: "surface 上の本文テキスト。コントラスト 4.5:1 以上を維持"
+  on-surface-muted:
+    value: "#6E675E"
+    description: "補助テキスト（公開日、フッター注記）。本文には使わない"
+  on-primary:
+    value: "#FFFFFF"
+    description: "primary 背景上のテキスト。primary 以外の背景では使わない"
+  divider:
+    value: "#E4DED4"
+    description: "リリース間の区切り線、カード枠線。テキストには使わない"
+
+typography:
+  body:
+    value: { size: "16px", line-height: "1.8" }
+    description: "リリースノート本文の基準。日本語長文の読み下し用。これより小さくしない"
+  heading-mail:
+    value: { size: "20px", line-height: "1.4", weight: "700" }
+    description: "メール全体のタイトル（ヘッダー帯内）。1 通に 1 箇所のみ"
+  heading-release:
+    value: { size: "18px", line-height: "1.4", weight: "700" }
+    description: "各リリースのバージョン見出し。本文中の強調には使わない"
+  caption:
+    value: { size: "13px", line-height: "1.5" }
+    description: "公開日・フッター注記などの補助情報。本文には使わない"
+
+spacing:
+  unit:
+    value: "8px"
+    description: "全スペーシングはこの倍数。恣意的な中間値を作らない"

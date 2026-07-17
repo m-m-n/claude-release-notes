@@ -1,0 +1,209 @@
+schema_version: 1
+feature: release-notes-fetcher
+created: 2026-07-17
+base_branch: main
+parent_branch: em-workflow/release-notes-fetcher/integration
+
+project:
+  components:
+    main:
+      language: go
+      build_command: "go build ./..."
+      test_command: "go test ./..."
+      format_command: "gofmt -w ."
+      e2e_test_command: ""
+
+workflow:
+  - id: create-spec
+    artifacts: [REQUIREMENTS.md, SPEC.md]
+    status: completed
+    completed_at_commit: 4b1eb9f4b2dcd465f31c3eb6b3ccaf9af162b4d7
+  - id: design
+    artifacts: [DESIGN.md, design/]
+    status: completed
+    completed_at_commit: 4b1eb9f4b2dcd465f31c3eb6b3ccaf9af162b4d7
+    skipped_reason: null
+  - id: create-plan
+    artifacts: [IMPLEMENTATION.md, VERIFICATION.md, tasks/]
+    status: completed
+    completed_at_commit: 4b1eb9f4b2dcd465f31c3eb6b3ccaf9af162b4d7
+  - id: implement
+    status: pending
+    base_commit: null
+  - id: review
+    status: pending
+  - id: verify
+    status: pending
+    result: null
+    failed_items: []
+  - id: retrospect
+    status: pending
+
+tasks:
+  task0001:
+    title: Config loading and validation
+    plan: tasks/task0001.md
+    files:
+      - internal/config/config.go
+      - internal/config/config_test.go
+      - go.mod
+      - go.sum
+    skills: [backend-impl]
+    domains: [input-handling]
+    complexity: low
+    requirements: [FR3, NFR2]
+    status: pending
+    notes: null
+  task0002:
+    title: Last-version state store
+    plan: tasks/task0002.md
+    files:
+      - internal/state/state.go
+      - internal/state/state_test.go
+      - go.mod
+    skills: [backend-impl]
+    domains: [data-persistence]
+    complexity: low
+    requirements: [FR2]
+    status: pending
+    notes: null
+  task0003:
+    title: GitHub Releases client
+    plan: tasks/task0003.md
+    files:
+      - internal/github/client.go
+      - internal/github/client_test.go
+      - go.mod
+    skills: [backend-impl]
+    domains: [external-io, input-handling]
+    complexity: medium
+    requirements: [FR1]
+    status: pending
+    notes: null
+  task0004:
+    title: claude-batch translation wrapper
+    plan: tasks/task0004.md
+    files:
+      - internal/translate/claudebatch.go
+      - internal/translate/claudebatch_test.go
+      - go.mod
+    skills: [backend-impl]
+    domains: [external-io]
+    complexity: medium
+    requirements: [FR4]
+    status: pending
+    notes: null
+  task0005:
+    title: HTML digest build and Gmail SMTP send
+    plan: tasks/task0005.md
+    files:
+      - internal/mail/build.go
+      - internal/mail/build_test.go
+      - internal/mail/send.go
+      - internal/mail/send_test.go
+      - go.mod
+    skills: [backend-impl, design-impl]
+    domains: [ui, external-io]
+    complexity: medium
+    requirements: [FR5, NFR2]
+    status: pending
+    notes: null
+  task0006:
+    title: Run pipeline and entry point
+    plan: tasks/task0006.md
+    files:
+      - internal/app/app.go
+      - internal/app/app_test.go
+      - cmd/claude-release-notes/main.go
+      - go.mod
+      - internal/config/config.go
+      - internal/state/state.go
+      - internal/github/client.go
+      - internal/translate/claudebatch.go
+      - internal/mail/build.go
+      - internal/mail/send.go
+    skills: [backend-impl]
+    domains: [external-io]
+    complexity: medium
+    requirements: [FR2, NFR1, NFR3, NFR4]
+    status: pending
+    notes: null
+  task0007:
+    title: systemd unit templates and README
+    plan: tasks/task0007.md
+    files:
+      - systemd/claude-release-notes.service
+      - systemd/claude-release-notes.timer
+      - README.md
+    skills: [infra-impl]
+    domains: [config-infra]
+    complexity: low
+    requirements: [FR6]
+    status: pending
+    notes: null
+
+review:
+  status: pending
+  rounds_completed: 0
+
+requirements:
+  FR1:
+    title: Fetch newer releases from GitHub Releases API (token auth, paging)
+    status: ok
+    tbd_reason: null
+    tasks: [task0003]
+    tests: [TS-1, TS-7]
+  FR2:
+    title: Last-version state file in XDG state dir, updated only after send
+    status: ok
+    tbd_reason: null
+    tasks: [task0002, task0006]
+    tests: [TS-2, TS-7]
+  FR3:
+    title: YAML config loading and validation (XDG config dir)
+    status: ok
+    tbd_reason: null
+    tasks: [task0001]
+    tests: [TS-3]
+  FR4:
+    title: Japanese translation via claude-batch (single combined stdin call)
+    status: ok
+    tbd_reason: null
+    tasks: [task0004]
+    tests: [TS-4]
+  FR5:
+    title: Build one HTML email (newest first) and send via Gmail SMTP
+    status: ok
+    tbd_reason: null
+    tasks: [task0005]
+    tests: [TS-5]
+  FR6:
+    title: Sample systemd user units (06/12/18 JST timer) and README docs
+    status: ok
+    tbd_reason: null
+    tasks: [task0007]
+    tests: [TS-8]
+  NFR1:
+    title: Stdlib-only Go (plus yaml.v3), single static binary
+    status: ok
+    tbd_reason: null
+    tasks: [task0006]
+    tests: [TS-10]
+  NFR2:
+    title: Secrets never logged; STARTTLS SMTP
+    status: ok
+    tbd_reason: null
+    tasks: [task0001, task0005]
+    tests: [TS-9]
+  NFR3:
+    title: Logging to stdout/stderr only, timezone-explicit timestamps
+    status: ok
+    tbd_reason: null
+    tasks: [task0006]
+    tests: [TS-11]
+  NFR4:
+    title: At-least-once delivery; failures exit non-zero without state update
+    status: ok
+    tbd_reason: null
+    tasks: [task0006]
+    tests: [TS-6]

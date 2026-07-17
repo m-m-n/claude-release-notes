@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>mockup: release notes digest email</title>
+<style>
+  :root {
+    --color-primary: #C15F3C;
+    --color-canvas: #F4F1EC;
+    --color-surface: #FFFFFF;
+    --color-on-surface: #2B2620;
+    --color-on-surface-muted: #6E675E;
+    --color-on-primary: #FFFFFF;
+    --color-divider: #E4DED4;
+    --typography-body-size: 16px;
+    --typography-body-line-height: 1.8;
+    --typography-heading-mail-size: 20px;
+    --typography-heading-release-size: 18px;
+    --typography-caption-size: 13px;
+    --spacing-unit: 8px;
+  }
+  body { margin: 0; background: #DDD; font-family: system-ui, sans-serif; }
+  .state-label { max-width: 600px; margin: 32px auto 8px; font: 700 14px system-ui;
+                 color: #333; }
+
+  /* email body */
+  .email { background: var(--color-canvas);
+           padding: calc(var(--spacing-unit) * 3) 0; }
+  .container { max-width: 600px; margin: 0 auto; background: var(--color-surface);
+               border: 1px solid var(--color-divider); }
+  .header { background: var(--color-primary); color: var(--color-on-primary);
+            padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3); }
+  .header h1 { margin: 0; font-size: var(--typography-heading-mail-size);
+               line-height: 1.4; }
+  .header .repo { font-size: var(--typography-caption-size); line-height: 1.5;
+                  margin-top: calc(var(--spacing-unit) / 2); opacity: 0.85; }
+  .release { padding: calc(var(--spacing-unit) * 3); }
+  .release + .release { border-top: 1px solid var(--color-divider); }
+  .release h2 { margin: 0; color: var(--color-primary);
+                font-size: var(--typography-heading-release-size); line-height: 1.4; }
+  .release .date { margin: calc(var(--spacing-unit) / 2) 0 0;
+                   color: var(--color-on-surface-muted);
+                   font-size: var(--typography-caption-size); line-height: 1.5; }
+  .release .body { margin-top: calc(var(--spacing-unit) * 2);
+                   color: var(--color-on-surface);
+                   font-size: var(--typography-body-size);
+                   line-height: var(--typography-body-line-height); }
+  .release .body ul { margin: 0; padding-left: calc(var(--spacing-unit) * 3); }
+  .release .body li + li { margin-top: var(--spacing-unit); }
+  .release .body .empty { color: var(--color-on-surface-muted); }
+  .footer { border-top: 1px solid var(--color-divider);
+            padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+            color: var(--color-on-surface-muted);
+            font-size: var(--typography-caption-size); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<p class="state-label">state: default — 複数リリース（新しい順）</p>
+<section data-state="default">
+  <div class="email">
+    <div class="container">
+      <div class="header">
+        <h1>Claude Code リリースノート</h1>
+        <div class="repo">anthropics/claude-code · 3 件の新しいリリース</div>
+      </div>
+      <div class="release">
+        <h2>v1.4.0</h2>
+        <p class="date">2026-07-16 公開</p>
+        <div class="body">
+          <ul>
+            <li>新しいプランモードを追加しました。複雑なタスクの前に実行計画を確認できます。</li>
+            <li>MCP サーバー接続の安定性を改善しました。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="release">
+        <h2>v1.3.2</h2>
+        <p class="date">2026-07-14 公開</p>
+        <div class="body">
+          <ul>
+            <li>長い会話でメモリ使用量が増え続ける問題を修正しました。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="release">
+        <h2>v1.3.1</h2>
+        <p class="date">2026-07-12 公開</p>
+        <div class="body">
+          <ul>
+            <li>Windows でのパス解決の不具合を修正しました。</li>
+            <li>いくつかの軽微な UI 改善を行いました。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer">claude-release-notes により自動送信 · 原文: GitHub Releases</div>
+    </div>
+  </div>
+</section>
+
+<p class="state-label">state: single — 初回実行（最新 1 件のみ）</p>
+<section data-state="single">
+  <div class="email">
+    <div class="container">
+      <div class="header">
+        <h1>Claude Code リリースノート</h1>
+        <div class="repo">anthropics/claude-code · 1 件の新しいリリース</div>
+      </div>
+      <div class="release">
+        <h2>v1.4.0</h2>
+        <p class="date">2026-07-16 公開</p>
+        <div class="body">
+          <ul>
+            <li>新しいプランモードを追加しました。複雑なタスクの前に実行計画を確認できます。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer">claude-release-notes により自動送信 · 原文: GitHub Releases</div>
+    </div>
+  </div>
+</section>
+
+<p class="state-label">state: empty-body — 本文が空のリリースを含む</p>
+<section data-state="empty-body">
+  <div class="email">
+    <div class="container">
+      <div class="header">
+        <h1>Claude Code リリースノート</h1>
+        <div class="repo">anthropics/claude-code · 2 件の新しいリリース</div>
+      </div>
+      <div class="release">
+        <h2>v1.4.1</h2>
+        <p class="date">2026-07-17 公開</p>
+        <div class="body"><p class="empty">（リリースノート記載なし）</p></div>
+      </div>
+      <div class="release">
+        <h2>v1.4.0</h2>
+        <p class="date">2026-07-16 公開</p>
+        <div class="body">
+          <ul>
+            <li>新しいプランモードを追加しました。複雑なタスクの前に実行計画を確認できます。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer">claude-release-notes により自動送信 · 原文: GitHub Releases</div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

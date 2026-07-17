@@ -1,0 +1,73 @@
+<!-- generated from tokens.yaml — edit the YAML, not this file -->
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>design tokens — claude-release-notes</title>
+<style>
+  body { margin: 0; padding: 32px; background: #F4F1EC; color: #2B2620;
+         font-family: system-ui, sans-serif; }
+  h1 { font-size: 20px; } h2 { font-size: 16px; margin-top: 40px; }
+  .meta { background: #FFFFFF; border: 1px solid #E4DED4; padding: 16px;
+          max-width: 640px; font-size: 14px; line-height: 1.6; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+              gap: 16px; max-width: 960px; }
+  .swatch { background: #FFFFFF; border: 1px solid #E4DED4; }
+  .chip { height: 64px; display: flex; align-items: center; padding: 0 16px;
+          font-weight: 700; }
+  .info { padding: 12px 16px; font-size: 13px; line-height: 1.5; }
+  .info code { display: block; margin-bottom: 4px; }
+  .type-sample { background: #FFFFFF; border: 1px solid #E4DED4; padding: 16px;
+                 max-width: 640px; margin-bottom: 16px; }
+  .spacing-row { display: flex; align-items: center; gap: 16px; }
+  .bar { background: #C15F3C; height: 16px; }
+</style>
+</head>
+<body>
+<h1>design tokens — claude-release-notes</h1>
+
+<h2>meta</h2>
+<div class="meta">
+  <strong>tone</strong>: 落ち着いた暖色ニュートラル。長文の日本語リリースノートを読み下すことが主目的なので、装飾は最小限にして本文の可読性を最優先する<br>
+  <strong>naming</strong>: 用途ベース（role-based）。値ベースの命名（blue-500 等）はしない
+</div>
+
+<h2>color</h2>
+<div class="swatches">
+  <div class="swatch">
+    <div class="chip" style="background:#C15F3C;color:#FFFFFF">primary / on-primary</div>
+    <div class="info"><code>primary: #C15F3C</code>アクセント（メールヘッダーの帯、バージョン見出し、リンク）。広い面の背景には使わない
+      <code style="margin-top:8px">on-primary: #FFFFFF</code>primary 背景上のテキスト。primary 以外の背景では使わない</div>
+  </div>
+  <div class="swatch">
+    <div class="chip" style="background:#F4F1EC;color:#2B2620">canvas</div>
+    <div class="info"><code>canvas: #F4F1EC</code>メール全体の背景。コンテンツカードの外側にのみ使う。テキストを直接載せない</div>
+  </div>
+  <div class="swatch">
+    <div class="chip" style="background:#FFFFFF;color:#2B2620;border-bottom:1px solid #E4DED4">surface / on-surface</div>
+    <div class="info"><code>surface: #FFFFFF</code>コンテンツカード（リリースノート本文領域）の背景
+      <code style="margin-top:8px">on-surface: #2B2620</code>surface 上の本文テキスト。コントラスト 4.5:1 以上を維持</div>
+  </div>
+  <div class="swatch">
+    <div class="chip" style="background:#FFFFFF;color:#6E675E">on-surface-muted</div>
+    <div class="info"><code>on-surface-muted: #6E675E</code>補助テキスト（公開日、フッター注記）。本文には使わない</div>
+  </div>
+  <div class="swatch">
+    <div class="chip" style="background:#E4DED4;color:#2B2620">divider</div>
+    <div class="info"><code>divider: #E4DED4</code>リリース間の区切り線、カード枠線。テキストには使わない</div>
+  </div>
+</div>
+
+<h2>typography</h2>
+<div class="type-sample" style="font-size:20px;line-height:1.4;font-weight:700">heading-mail 20px/1.4 700 — Claude Code リリースノート</div>
+<div class="type-sample" style="font-size:18px;line-height:1.4;font-weight:700;color:#C15F3C">heading-release 18px/1.4 700 — v1.2.3</div>
+<div class="type-sample" style="font-size:16px;line-height:1.8">body 16px/1.8 — リリースノート本文の基準。日本語長文の読み下し用。これより小さくしない。</div>
+<div class="type-sample" style="font-size:13px;line-height:1.5;color:#6E675E">caption 13px/1.5 — 2026-07-17 公開</div>
+
+<h2>spacing</h2>
+<div class="spacing-row"><span style="width:80px">unit 8px</span><div class="bar" style="width:8px"></div></div>
+<div class="spacing-row"><span style="width:80px">×2 16px</span><div class="bar" style="width:16px"></div></div>
+<div class="spacing-row"><span style="width:80px">×3 24px</span><div class="bar" style="width:24px"></div></div>
+<div class="spacing-row"><span style="width:80px">×4 32px</span><div class="bar" style="width:32px"></div></div>
+</body>
+</html>
