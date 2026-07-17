@@ -1,0 +1,10 @@
+[Unit]
+Description=Run claude-release-notes.service at 06:00/12:00/18:00 JST
+
+[Timer]
+OnCalendar=*-*-* 06,12,18:00:00 Asia/Tokyo
+Persistent=true
+Unit=claude-release-notes.service
+
+[Install]
+WantedBy=timers.target
