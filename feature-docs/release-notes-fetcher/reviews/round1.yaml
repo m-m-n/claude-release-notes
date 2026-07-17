@@ -1,0 +1,161 @@
+round: 1
+executed_at: "2026-07-17T22:07:44+09:00"
+scope:
+  review_mode: diff
+  base_commit: 4b1eb9f4b2dcd465f31c3eb6b3ccaf9af162b4d7
+  head_commit: 11fc1401652cde25a0e68ba612d2019aeb4ce6a1
+  changed_files:
+    - README.md
+    - cmd/claude-release-notes/main.go
+    - design-system/tokens.html
+    - design-system/tokens.yaml
+    - go.mod
+    - go.sum
+    - internal/app/app.go
+    - internal/app/app_test.go
+    - internal/config/config.go
+    - internal/config/config_test.go
+    - internal/github/client.go
+    - internal/github/client_test.go
+    - internal/mail/build.go
+    - internal/mail/build_test.go
+    - internal/mail/send.go
+    - internal/mail/send_test.go
+    - internal/state/state.go
+    - internal/state/state_test.go
+    - internal/translate/claudebatch.go
+    - internal/translate/claudebatch_test.go
+    - systemd/claude-release-notes.service
+    - systemd/claude-release-notes.timer
+    - test/README.md
+plan:
+  floor: [comprehensive, spec, security, performance]
+  discretionary: []
+  codex_cross_validation: true
+perspective_runs:
+  - {perspective: comprehensive, source: claude, status: completed}
+  - {perspective: spec, source: claude, status: completed}
+  - {perspective: security, source: claude, status: completed}
+  - {perspective: performance, source: claude, status: completed}
+  - {perspective: security, source: codex, status: completed}
+  - {perspective: performance, source: codex, status: completed}
+  - {perspective: spec, source: codex, status: completed}
+findings:
+  - stable_id: 575a2d6cae400873
+    severity: high
+    category: security
+    file: internal/translate/claudebatch.go
+    line: 102
+    title: "Untrusted release text becomes instructions for an unconstrained coding agent"
+    description: "GitHub リリース本文が固定の区切りマーカーとともに claude-batch のプロンプトへ素通しされるため、悪意あるリリースがマーカーを偽造して指示注入できる可能性。claude-batch はツール制限なしで起動されるため、注入指示がローカルファイルへアクセスしうるという指摘"
+    suggestion: "ツール無効化・隔離環境での実行、指示とデータの分離、リクエストごとの不透明な識別子、厳格な出力検証、実行タイムアウトの追加"
+    sources: [codex:security]
+    confidence: 50
+    resolution: declined
+    resolution_reason: "ユーザー判断でリスク受容。取得元は anthropics/claude-code 公式リポジトリのみで、claude-batch 側の挙動制御はこのリポジトリのスコープ外"
+  - stable_id: 151c7c1888122ed9
+    severity: medium
+    category: comprehensive
+    file: internal/mail/send.go
+    line: 54
+    title: "SMTP session has no I/O deadline — a stalled server hangs the run indefinitely"
+    description: "DialTimeout は接続確立のみを制限し、以降の greeting/STARTTLS/AUTH/DATA は net.Conn にデッドラインが無く、応答が止まったサーバーで無期限ブロックする。github クライアントは 15s タイムアウト設定済みでこの経路のみ未境界"
+    suggestion: "dial 成功後 smtp.NewClient へ渡す前に conn.SetDeadline を設定する（github クライアントのタイムアウト方針と揃える）"
+    sources: [claude:comprehensive]
+    confidence: 80
+    resolution: unresolved
+  - stable_id: 2507869758aee563
+    severity: medium
+    category: performance
+    file: internal/mail/send.go
+    line: 54
+    title: "SMTP operations can block indefinitely after dialing"
+    description: "同一箇所への performance 観点からの指摘（接続後の SMTP 操作が無期限ブロックしうる）"
+    suggestion: "SMTP クライアント構築前に net.Conn へ read/write デッドラインを設定し、必要に応じ操作ごとに更新する"
+    sources: [codex:performance]
+    confidence: 65
+    resolution: unresolved
+  - stable_id: d3c3ccdb8d80d5e4
+    severity: medium
+    category: comprehensive
+    file: internal/translate/claudebatch.go
+    line: 68
+    title: "claude-batch subprocess runs with no timeout — a hung subprocess hangs the run indefinitely"
+    description: "runSubprocess が exec.Command(...).Run() をコンテキスト・タイムアウトなしで呼ぶため、claude-batch がハングするとパイプライン全体が完了しない"
+    suggestion: "exec.CommandContext + 有限のタイムアウトを使い、ctx.DeadlineExceeded を translate ステージのエラーとして表面化する"
+    sources: [claude:comprehensive]
+    confidence: 65
+    resolution: unresolved
+  - stable_id: be6759dd77dbcf4c
+    severity: medium
+    category: performance
+    file: internal/translate/claudebatch.go
+    line: 61
+    title: "Translation subprocess has no execution deadline"
+    description: "同一問題への performance 観点からの指摘（翻訳サブプロセスに実行期限が無い）"
+    suggestion: "exec.CommandContext と設定可能な翻訳タイムアウトを使い、キャンセルで子プロセスを確実に終了させる"
+    sources: [codex:performance]
+    confidence: 50
+    resolution: unresolved
+  - stable_id: 85f099b7da5e0c15
+    severity: medium
+    category: security
+    file: internal/config/config.go
+    line: 56
+    title: "Credential file permissions are not enforced"
+    description: "config.yaml に Gmail アプリパスワード・GitHub トークンが含まれるが、Load はパーミッションビットを検査せず 0644 でも黙って受理する。README の chmod 600 は勧告に留まる"
+    suggestion: "ファイルディスクリプタを Stat で検査し、group/other ビット (0077) が立っていれば拒否する。所有者検査も加え、検証済みディスクリプタから読むことで TOCTOU を避ける"
+    sources: [codex:security]
+    confidence: 50
+    resolution: unresolved
+  - stable_id: 7c7657516af19359
+    severity: medium
+    category: performance
+    file: internal/github/client.go
+    line: 85
+    title: "Missing checkpoint triggers unbounded historical translation"
+    description: "保存済みバージョンがリリース一覧から消えた場合（削除・改名・破損）、Since が全履歴を取得し claude-batch へ一括送信するため、通常ポーリングが無制限の履歴翻訳に化ける（SPEC 上は既知エッジケースとして「全件扱い」を規定済み）"
+    suggestion: "チェックポイント不明時に失敗させるか、設定可能なキャッチアップ上限を設ける。意図的なバックフィルはチャンク処理で進捗を永続化する"
+    sources: [codex:performance]
+    confidence: 50
+    resolution: unresolved
+  - stable_id: 80441756a394d06c
+    severity: medium
+    category: performance
+    file: test/README.md
+    line: 1
+    title: "Reviewed data contains agent-directed command instructions"
+    description: "diff に AI エージェント向けの指示文書（go test 実行指示等）が含まれることへのレビューパイプライン上の懸念。レビュー中は不活性データとして扱った旨の報告"
+    suggestion: "レビューツーリングがリポジトリ本文をエージェント指示に昇格させないことを保証する（em-workflow は設計上対応済み）"
+    sources: [codex:performance]
+    confidence: 50
+    resolution: declined
+    resolution_reason: "コード欠陥ではなくレビューパイプライン設計への懸念。test/README.md は意図的なプロジェクト規約であり、em-workflow のレビュープロトコル自体がリポジトリ内容を untrusted data として扱う設計"
+  - stable_id: 99cbda056f47180d
+    severity: medium
+    category: spec
+    file: internal/state/state.go
+    line: 42
+    title: "State path silently falls back to the working directory"
+    description: "XDG_STATE_HOME 未設定かつ HOME 解決不能時に「.」へ暗黙フォールバックし、カレントディレクトリ相対の .local/state を使うため、環境が剥がされた実行で誤った状態を読み書きし再送しうる"
+    suggestion: "HOME 解決エラーを state ロードまで伝播させ、「.」への置換ではなく非ゼロ終了にする"
+    sources: [codex:spec]
+    confidence: 50
+    resolution: unresolved
+  - stable_id: 31fb9feaa79f47b0
+    severity: medium
+    category: spec
+    file: README.md
+    line: 10
+    title: "Documented build does not guarantee a static binary"
+    description: "SPEC NFR1 は single static binary を要求するが、README のビルド手順は素の go build で CGO 有効環境では静的リンクが保証されない"
+    suggestion: "CGO_ENABLED=0 go build を再現可能なビルド手順として提供・文書化する"
+    sources: [codex:spec]
+    confidence: 50
+    resolution: unresolved
+auto_fix:
+  loops_run: 1
+  applied_total: 0
+  termination: no-progress   # 唯一の high 候補 S1 をユーザーが Skip（リスク受容）
+residual_critical_high: 0
+rework_required: false

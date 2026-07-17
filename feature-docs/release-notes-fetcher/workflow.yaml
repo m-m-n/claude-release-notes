@@ -28,16 +28,20 @@ workflow:
     status: completed
     completed_at_commit: 4b1eb9f4b2dcd465f31c3eb6b3ccaf9af162b4d7
   - id: implement
-    status: pending
-    base_commit: null
+    status: completed
+    completed_at_commit: 11fc1401652cde25a0e68ba612d2019aeb4ce6a1
+    base_commit: 4b1eb9f4b2dcd465f31c3eb6b3ccaf9af162b4d7
   - id: review
-    status: pending
+    status: completed
+    completed_at_commit: 11fc1401652cde25a0e68ba612d2019aeb4ce6a1
   - id: verify
-    status: pending
-    result: null
+    status: completed
+    completed_at_commit: 11fc1401652cde25a0e68ba612d2019aeb4ce6a1
+    result: pass
     failed_items: []
   - id: retrospect
-    status: pending
+    status: completed
+    completed_at_commit: 11fc1401652cde25a0e68ba612d2019aeb4ce6a1
 
 tasks:
   task0001:
@@ -52,8 +56,9 @@ tasks:
     domains: [input-handling]
     complexity: low
     requirements: [FR3, NFR2]
-    status: pending
+    status: merged
     notes: null
+    branch: em-workflow/release-notes-fetcher/task0001
   task0002:
     title: Last-version state store
     plan: tasks/task0002.md
@@ -65,8 +70,9 @@ tasks:
     domains: [data-persistence]
     complexity: low
     requirements: [FR2]
-    status: pending
+    status: merged
     notes: null
+    branch: em-workflow/release-notes-fetcher/task0002
   task0003:
     title: GitHub Releases client
     plan: tasks/task0003.md
@@ -78,8 +84,9 @@ tasks:
     domains: [external-io, input-handling]
     complexity: medium
     requirements: [FR1]
-    status: pending
+    status: merged
     notes: null
+    branch: em-workflow/release-notes-fetcher/task0003
   task0004:
     title: claude-batch translation wrapper
     plan: tasks/task0004.md
@@ -91,8 +98,9 @@ tasks:
     domains: [external-io]
     complexity: medium
     requirements: [FR4]
-    status: pending
+    status: merged
     notes: null
+    branch: em-workflow/release-notes-fetcher/task0004
   task0005:
     title: HTML digest build and Gmail SMTP send
     plan: tasks/task0005.md
@@ -106,8 +114,9 @@ tasks:
     domains: [ui, external-io]
     complexity: medium
     requirements: [FR5, NFR2]
-    status: pending
+    status: merged
     notes: null
+    branch: em-workflow/release-notes-fetcher/task0005
   task0006:
     title: Run pipeline and entry point
     plan: tasks/task0006.md
@@ -126,8 +135,9 @@ tasks:
     domains: [external-io]
     complexity: medium
     requirements: [FR2, NFR1, NFR3, NFR4]
-    status: pending
+    status: merged
     notes: null
+    branch: em-workflow/release-notes-fetcher/task0006
   task0007:
     title: systemd unit templates and README
     plan: tasks/task0007.md
@@ -139,12 +149,24 @@ tasks:
     domains: [config-infra]
     complexity: low
     requirements: [FR6]
-    status: pending
+    status: merged
     notes: null
+    branch: em-workflow/release-notes-fetcher/task0007
 
 review:
-  status: pending
-  rounds_completed: 0
+  status: completed
+  rounds_completed: 1
+  plan:
+    floor: [comprehensive, spec, security, performance]
+    discretionary: []
+    codex_cross_validation: true
+  perspectives:
+    comprehensive: completed
+    spec: completed
+    security: completed
+    performance: completed
+  residual_critical_high: 0
+  needs_rework: false
 
 requirements:
   FR1:

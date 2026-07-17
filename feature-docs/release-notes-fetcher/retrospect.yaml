@@ -1,0 +1,30 @@
+feature: release-notes-fetcher
+collected_at: "2026-07-17T22:09:24+09:00"
+session_ids: [24a0dac4-d274-4713-84e9-29b8ab678129]
+signals:
+  review_critical_high:
+    - stable_id: 575a2d6cae400873
+      category: security
+      file: internal/translate/claudebatch.go
+      title: "Untrusted release text becomes instructions for an unconstrained coding agent"
+      resolution: declined
+  conflict_reworks:
+    - {task: task0001, retries: 1}
+    - {task: task0003, retries: 1}
+    - {task: task0004, retries: 1}
+    - {task: task0005, retries: 1}
+    - {task: task0006, retries: 1}
+  file_prediction_misses: []
+  verification_failures: []
+  discretionary_perspectives: []
+  declined_findings:
+    - stable_id: 575a2d6cae400873
+      category: security
+      resolution_reason: "ユーザー判断でリスク受容。取得元は anthropics/claude-code 公式リポジトリのみで、claude-batch 側の挙動制御はこのリポジトリのスコープ外"
+    - stable_id: 80441756a394d06c
+      category: performance
+      resolution_reason: "コード欠陥ではなくレビューパイプライン設計への懸念。test/README.md は意図的なプロジェクト規約であり、em-workflow のレビュープロトコル自体がリポジトリ内容を untrusted data として扱う設計"
+lessons_candidates:
+  - "並列 Go タスク 7 件中 5 件が go.mod の add/add コンフリクトで conflict_retries=1 になった。新規 Go プロジェクトでは planner/オーケストレーターが implement 開始時に go.mod を integration ブランチへ事前コミットしておくと、このコンフリクト群を丸ごと回避できる可能性がある"
+  - "task0006 の compile-only スタブ方式（IMPLEMENTATION.md placeholder rule）は機能した。task0005 が後からマージする際に親側採用→本実装再適用のプロトコルで正しく本実装が残った"
+  - "medium 残存 findings のうちタイムアウト系 3 件（SMTP デッドライン・claude-batch 実行期限）は同根で、無人バッチという性質上フォローアップ実装の価値が高い"
