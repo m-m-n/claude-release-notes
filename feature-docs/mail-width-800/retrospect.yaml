@@ -1,0 +1,11 @@
+feature: mail-width-800
+collected_at: "2026-07-18T15:40:47+09:00"
+session_ids: [5dfd1378-0559-4007-a2ad-9b40423957de]
+signals:
+  review_critical_high: []
+  conflict_reworks: []
+  file_prediction_misses: []
+  verification_failures: []
+  discretionary_perspectives: []
+  declined_findings: []
+lessons_candidates: []
