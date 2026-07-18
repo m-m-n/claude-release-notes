@@ -1,0 +1,78 @@
+round: 1
+executed_at: "2026-07-18T14:07:15+09:00"
+scope:
+  review_mode: diff
+  base_commit: 3fc0ae13d2036c10e4f064a9c2efaa8b955c6cba
+  head_commit: b03b4de5f05af2c3cbb33a904767389944759462
+  changed_files:
+    - design-system/tokens.html
+    - design-system/tokens.yaml
+    - internal/mail/build.go
+    - internal/mail/build_test.go
+    - internal/mail/markdown.go
+    - internal/mail/markdown_test.go
+    - internal/translate/claudebatch.go
+    - internal/translate/claudebatch_test.go
+plan:
+  floor: [comprehensive, spec, security, performance]
+  discretionary: []
+  codex_cross_validation: true
+perspective_runs:
+  - {perspective: comprehensive, source: claude, status: completed}
+  - {perspective: spec, source: claude, status: completed}
+  - {perspective: security, source: claude, status: completed}
+  - {perspective: performance, source: claude, status: completed}
+  - {perspective: security, source: codex, status: completed}
+  - {perspective: performance, source: codex, status: skipped, skip_reason: "codex prompt-delivery issue: spec-perspective response returned for the performance prompt on both attempts"}
+  - {perspective: spec, source: codex, status: completed}
+findings:
+  - stable_id: d6a6bae72f921952
+    severity: medium
+    category: spec
+    file: internal/mail/markdown.go
+    line: 199
+    title: "コードブロックに DESIGN.md 決定の横スクロール(overflow)が未実装"
+    description: "DESIGN.md はコードブロックに「horizontal scroll when overflowing」を決定しているが、生成される <pre> の inline style に overflow-x:auto が無い。長いコマンド行が 600px カラムをはみ出しレイアウト崩れ/クリップを起こす"
+    suggestion: "＜pre＞ の inline style に overflow-x:auto を追加する（claude:spec から適用可能な unified diff 提案あり）"
+    sources: [claude:spec, codex:spec]
+    confidence: 95
+    resolution: unresolved
+  - stable_id: 4d6b56426c1d3658
+    severity: medium
+    category: spec
+    file: internal/mail/markdown.go
+    line: 112
+    title: "Fence detection can silently discard unsupported line content"
+    description: "``` で始まる行を全て完全なフェンスとして扱い行全体をスキップするため、``` の後に続くテキスト（例: ``` trailing text）が消失する。SPEC US1/FR1 の「never dropped」に反する"
+    suggestion: "閉じフェンスは ``` + 空白のみの行に限定し、それ以外の後続テキストは段落フォールバックで保持する"
+    sources: [codex:spec]
+    confidence: 50
+    resolution: unresolved
+  - stable_id: 782a6b825666b592
+    severity: medium
+    category: spec
+    file: internal/mail/markdown.go
+    line: 160
+    title: "List and code-block text does not use the on-surface token"
+    description: "リストと <pre> の style に文字色が無く、外側コンテナにも無いため、メールクライアントの既定色にフォールバックする。DESIGN.md/FR2 の on-surface #232A31 指定と不一致。リストは body の line-height 1.8 も未継承"
+    suggestion: "本文ラッパーに body タイポグラフィ + color:#232A31 を適用するか、リスト/コードブロックへ明示的に指定する"
+    sources: [codex:spec]
+    confidence: 50
+    resolution: unresolved
+  - stable_id: 747d0a8adb3356cb
+    severity: medium
+    category: spec
+    file: internal/mail/markdown.go
+    line: 280
+    title: "Valid HTTP links with balanced parentheses are parsed incorrectly"
+    description: "parseLink が開き括弧後の最初の ) を終端として選ぶため、[docs](https://example.com/a(b)) のような括弧を含む正当な URL が途切れた href になる"
+    suggestion: "リンク先の括弧の釣り合いを解釈するか、解釈できない場合は構文全体をエスケープ済みプレーンテキストとして保持する"
+    sources: [codex:spec]
+    confidence: 50
+    resolution: unresolved
+auto_fix:
+  loops_run: 0
+  applied_total: 0
+  termination: clean   # 全 findings が medium/spec で auto-fix 対象外
+residual_critical_high: 0
+rework_required: false

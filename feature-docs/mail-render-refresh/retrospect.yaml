@@ -1,0 +1,19 @@
+feature: mail-render-refresh
+collected_at: "2026-07-18T14:26:58+09:00"
+session_ids: [24a0dac4-d274-4713-84e9-29b8ab678129]
+signals:
+  review_critical_high: []
+  conflict_reworks: []
+  file_prediction_misses: []
+  verification_failures:
+    - "verify 1 回目 MT-1 fail: <pre> に overflow-x:auto が無い（review d6a6bae72f921952）→ task0003 rework で解消"
+    - "verify 1 回目 MT-1 fail: リスト/<pre> が body トークン（16px/1.8/#232A31）を継承せずモックと乖離（review 782a6b825666b592）→ task0003 rework で解消"
+  discretionary_perspectives: []
+  declined_findings:
+    - stable_id: d8e136481e28ff0f
+      category: performance
+      resolution_reason: "クロスモデルで見解相違（claude performance は現実的入力スケールで問題化しないと分析）。信頼済み取得元・1 日 3 回のバッチ用途のためリスク受容"
+lessons_candidates:
+  - "codex-reviewer の performance 実行が round 1 で spec 用プロンプトの応答を 2 回連続で受け取った（プロンプト配送不具合の疑い、レビュアー自身が正しく skip 判定）。em-workflow プラグイン側の調査候補"
+  - "モックの要素スタイル（overflow・タイポグラフィ継承）がタスク計画に網羅されず実装漏れ → verify の MT-1（モック照合）が設計どおり検出して rework で回収。planner がモックの要素スタイルを AC に展開し切る余地あり"
+  - "verify fail → rework（タスク追加）→ review 再ラウンド → verify 再実行のループが 1 周で収束。差し戻しフローは機能している"
