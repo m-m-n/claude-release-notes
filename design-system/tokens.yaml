@@ -1,29 +1,32 @@
 meta:
-  tone: "落ち着いた暖色ニュートラル。長文の日本語リリースノートを読み下すことが主目的なので、装飾は最小限にして本文の可読性を最優先する"
+  tone: "落ち着いた寒色ニュートラル。長文の日本語リリースノートを読み下すことが主目的なので、装飾は最小限にして本文の可読性を最優先する"
   naming: "用途ベース（role-based）。値ベースの命名（blue-500 等）はしない"
 
 color:
   primary:
-    value: "#C15F3C"
+    value: "#33658A"
     description: "アクセント（メールヘッダーの帯、バージョン見出し、リンク）。広い面の背景には使わない"
   canvas:
-    value: "#F4F1EC"
+    value: "#EDF1F5"
     description: "メール全体の背景。コンテンツカードの外側にのみ使う。テキストを直接載せない"
   surface:
     value: "#FFFFFF"
     description: "コンテンツカード（リリースノート本文領域）の背景"
   on-surface:
-    value: "#2B2620"
+    value: "#232A31"
     description: "surface 上の本文テキスト。コントラスト 4.5:1 以上を維持"
   on-surface-muted:
-    value: "#6E675E"
+    value: "#5C6B7A"
     description: "補助テキスト（公開日、フッター注記）。本文には使わない"
   on-primary:
     value: "#FFFFFF"
     description: "primary 背景上のテキスト。primary 以外の背景では使わない"
   divider:
-    value: "#E4DED4"
+    value: "#D9E1E8"
     description: "リリース間の区切り線、カード枠線。テキストには使わない"
+  surface-muted:
+    value: "#EDF1F5"
+    description: "インラインコード・コードブロックの背景。カード全面など広い面には使わない"
 
 typography:
   body:
@@ -38,6 +41,12 @@ typography:
   caption:
     value: { size: "13px", line-height: "1.5" }
     description: "公開日・フッター注記などの補助情報。本文には使わない"
+  heading-body:
+    value: { size: "16px", line-height: "1.5", weight: "700" }
+    description: "本文中のサブ見出し（Markdown 見出し由来）。バージョン見出しより目立たせない"
+  code:
+    value: { size: "13px", line-height: "1.6" }
+    description: "コードブロックの基準（等幅）。インラインコードは周囲の本文サイズの約 0.875 倍"
 
 spacing:
   unit:

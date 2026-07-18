@@ -1,0 +1,104 @@
+schema_version: 1
+feature: mail-render-refresh
+created: 2026-07-18
+base_branch: main
+parent_branch: em-workflow/mail-render-refresh/integration
+
+project:
+  components:
+    main:
+      language: go
+      build_command: "go build ./..."
+      test_command: "go test ./..."
+      format_command: "gofmt -w ."
+      e2e_test_command: ""
+
+workflow:
+  - id: create-spec
+    artifacts: [REQUIREMENTS.md, SPEC.md]
+    status: completed
+    completed_at_commit: 3fc0ae13d2036c10e4f064a9c2efaa8b955c6cba
+  - id: design
+    artifacts: [DESIGN.md, design/]
+    status: completed
+    completed_at_commit: 3fc0ae13d2036c10e4f064a9c2efaa8b955c6cba
+    skipped_reason: null
+  - id: create-plan
+    artifacts: [IMPLEMENTATION.md, VERIFICATION.md, tasks/]
+    status: completed
+    completed_at_commit: 3fc0ae13d2036c10e4f064a9c2efaa8b955c6cba
+  - id: implement
+    status: pending
+    base_commit: null
+  - id: review
+    status: pending
+  - id: verify
+    status: pending
+    result: null
+    failed_items: []
+  - id: retrospect
+    status: pending
+
+tasks:
+  task0001:
+    title: Markdown-preserving translation instruction
+    plan: tasks/task0001.md
+    files:
+      - internal/translate/claudebatch.go
+      - internal/translate/claudebatch_test.go
+    skills: [backend-impl]
+    domains: [external-io]
+    complexity: low
+    requirements: [FR3]
+    status: pending
+    notes: null
+  task0002:
+    title: Markdown renderer and cool-palette mail styles
+    plan: tasks/task0002.md
+    files:
+      - internal/mail/markdown.go
+      - internal/mail/markdown_test.go
+      - internal/mail/build.go
+      - internal/mail/build_test.go
+    skills: [backend-impl, design-impl]
+    domains: [ui, input-handling]
+    complexity: medium
+    requirements: [FR1, FR2, NFR1, NFR2]
+    status: pending
+    notes: null
+
+review:
+  status: pending
+  rounds_completed: 0
+
+requirements:
+  FR1:
+    title: Minimal self-written Markdown-to-HTML renderer for mail bodies
+    status: ok
+    tbd_reason: null
+    tasks: [task0002]
+    tests: [TS-1, TS-2, TS-6]
+  FR2:
+    title: Inline styles follow current cool design tokens and DESIGN.md
+    status: ok
+    tbd_reason: null
+    tasks: [task0002]
+    tests: [TS-4]
+  FR3:
+    title: Translation instruction preserves Markdown syntax and structure
+    status: ok
+    tbd_reason: null
+    tasks: [task0001]
+    tests: [TS-5]
+  NFR1:
+    title: Dependency policy unchanged (stdlib + yaml.v3, no Markdown lib)
+    status: ok
+    tbd_reason: null
+    tasks: [task0002]
+    tests: [TS-7]
+  NFR2:
+    title: Escape-before-markup rendering; http/https-only link schemes
+    status: ok
+    tbd_reason: null
+    tasks: [task0002]
+    tests: [TS-3]

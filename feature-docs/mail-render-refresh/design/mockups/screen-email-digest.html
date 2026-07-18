@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>mockup: release notes digest email (markdown rendered)</title>
+<style>
+  :root {
+    --color-primary: #33658A;
+    --color-canvas: #EDF1F5;
+    --color-surface: #FFFFFF;
+    --color-on-surface: #232A31;
+    --color-on-surface-muted: #5C6B7A;
+    --color-on-primary: #FFFFFF;
+    --color-divider: #D9E1E8;
+    --color-surface-muted: #EDF1F5;
+    --typography-body-size: 16px;
+    --typography-body-line-height: 1.8;
+    --typography-heading-mail-size: 20px;
+    --typography-heading-release-size: 18px;
+    --typography-heading-body-size: 16px;
+    --typography-caption-size: 13px;
+    --typography-code-size: 13px;
+    --spacing-unit: 8px;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  body { margin: 0; background: #DDD; font-family: system-ui, sans-serif; }
+  .state-label { max-width: 600px; margin: 32px auto 8px; font: 700 14px system-ui;
+                 color: #333; }
+
+  /* email frame */
+  .email { background: var(--color-canvas);
+           padding: calc(var(--spacing-unit) * 3) 0; }
+  .container { max-width: 600px; margin: 0 auto; background: var(--color-surface);
+               border: 1px solid var(--color-divider); }
+  .header { background: var(--color-primary); color: var(--color-on-primary);
+            padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3); }
+  .header h1 { margin: 0; font-size: var(--typography-heading-mail-size);
+               line-height: 1.4; }
+  .header .repo { font-size: var(--typography-caption-size); line-height: 1.5;
+                  margin-top: calc(var(--spacing-unit) / 2); opacity: 0.85; }
+  .release { padding: calc(var(--spacing-unit) * 3); }
+  .release + .release { border-top: 1px solid var(--color-divider); }
+  .release h2 { margin: 0; color: var(--color-primary);
+                font-size: var(--typography-heading-release-size); line-height: 1.4; }
+  .release .date { margin: calc(var(--spacing-unit) / 2) 0 0;
+                   color: var(--color-on-surface-muted);
+                   font-size: var(--typography-caption-size); line-height: 1.5; }
+  .release .body { margin-top: calc(var(--spacing-unit) * 2);
+                   color: var(--color-on-surface);
+                   font-size: var(--typography-body-size);
+                   line-height: var(--typography-body-line-height); }
+
+  /* markdown-rendered elements (this feature's additions) */
+  .body h3 { margin: calc(var(--spacing-unit) * 3) 0 var(--spacing-unit);
+             font-size: var(--typography-heading-body-size); line-height: 1.5;
+             color: var(--color-on-surface); }
+  .body h3:first-child { margin-top: 0; }
+  .body p { margin: var(--spacing-unit) 0; }
+  .body ul, .body ol { margin: var(--spacing-unit) 0;
+                       padding-left: calc(var(--spacing-unit) * 3); }
+  .body li + li { margin-top: var(--spacing-unit); }
+  .body code { font-family: var(--font-mono); font-size: 0.875em;
+               background: var(--color-surface-muted);
+               padding: 1px 4px; border-radius: 3px; }
+  .body pre { margin: var(--spacing-unit) 0;
+              padding: calc(var(--spacing-unit) * 2);
+              background: var(--color-surface-muted); border-radius: 4px;
+              font-family: var(--font-mono);
+              font-size: var(--typography-code-size); line-height: 1.6;
+              overflow-x: auto; }
+  .body pre code { background: none; padding: 0; font-size: inherit; }
+  .body a { color: var(--color-primary); text-decoration: underline; }
+  .body strong { font-weight: 700; }
+  .body .empty { color: var(--color-on-surface-muted); }
+
+  .footer { border-top: 1px solid var(--color-divider);
+            padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+            color: var(--color-on-surface-muted);
+            font-size: var(--typography-caption-size); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<p class="state-label">state: rendered — Markdown が HTML 描画された本文</p>
+<section data-state="rendered">
+  <div class="email">
+    <div class="container">
+      <div class="header">
+        <h1>Claude Code リリースノート</h1>
+        <div class="repo">anthropics/claude-code · 1 件の新しいリリース</div>
+      </div>
+      <div class="release">
+        <h2>v2.1.214</h2>
+        <p class="date">2026-07-18 公開</p>
+        <div class="body">
+          <h3>変更内容</h3>
+          <ul>
+            <li><code>Edit(src/**)</code> のような単一セグメントの <code>dir/**</code> allow ルールが、ツリー内の任意の場所にあるネストされた <code>dir/</code> ディレクトリへの書き込みを自動承認していた問題を修正</li>
+            <li>Windows PowerShell 5.1 セッションで実行されるコマンドに影響する<strong>パーミッションチェックのバイパス</strong>を修正</li>
+            <li>詳細は <a href="https://example.com/changelog">changelog</a> を参照</li>
+          </ul>
+          <h3>使用例</h3>
+          <pre><code>claude --permission-mode plan</code></pre>
+        </div>
+      </div>
+      <div class="footer">claude-release-notes により自動送信 · 原文: GitHub Releases</div>
+    </div>
+  </div>
+</section>
+
+<p class="state-label">state: plain — Markdown 記法なしの本文（段落フォールバック）</p>
+<section data-state="plain">
+  <div class="email">
+    <div class="container">
+      <div class="header">
+        <h1>Claude Code リリースノート</h1>
+        <div class="repo">anthropics/claude-code · 1 件の新しいリリース</div>
+      </div>
+      <div class="release">
+        <h2>v2.1.215</h2>
+        <p class="date">2026-07-19 公開</p>
+        <div class="body">
+          <p>軽微な不具合修正を行いました。</p>
+          <p>安定性が向上しています。</p>
+        </div>
+      </div>
+      <div class="footer">claude-release-notes により自動送信 · 原文: GitHub Releases</div>
+    </div>
+  </div>
+</section>
+
+<p class="state-label">state: empty-body — 本文が空のリリース</p>
+<section data-state="empty-body">
+  <div class="email">
+    <div class="container">
+      <div class="header">
+        <h1>Claude Code リリースノート</h1>
+        <div class="repo">anthropics/claude-code · 1 件の新しいリリース</div>
+      </div>
+      <div class="release">
+        <h2>v2.1.216</h2>
+        <p class="date">2026-07-19 公開</p>
+        <div class="body"><p class="empty">（リリースノート記載なし）</p></div>
+      </div>
+      <div class="footer">claude-release-notes により自動送信 · 原文: GitHub Releases</div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
