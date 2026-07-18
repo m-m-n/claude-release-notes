@@ -50,12 +50,12 @@ func renderMarkdown(body string) string {
 	for i < len(lines) {
 		line := lines[i]
 
-		if isFenceLine(line) {
+		if isOpeningFenceLine(line) {
 			flushParagraph()
 			flushList()
 			var code []string
 			i++
-			for i < len(lines) && !isFenceLine(lines[i]) {
+			for i < len(lines) && !isClosingFenceLine(lines[i]) {
 				code = append(code, lines[i])
 				i++
 			}
@@ -105,11 +105,21 @@ func renderMarkdown(body string) string {
 	return out.String()
 }
 
-// isFenceLine reports whether line opens or closes a fenced code block.
-// Trailing content after the fence marker (a language hint, e.g. "```go")
-// is accepted and ignored.
-func isFenceLine(line string) bool {
+// isOpeningFenceLine reports whether line opens a fenced code block. Any
+// content trailing the fence marker is an info string (e.g. a language
+// hint, "```go") and is discarded — the line is only used to detect the
+// opening, never rendered (AC-3).
+func isOpeningFenceLine(line string) bool {
 	return strings.HasPrefix(strings.TrimSpace(line), "```")
+}
+
+// isClosingFenceLine reports whether line closes an open fenced code block:
+// its trimmed content must be the fence marker alone, with no trailing text
+// (AC-3). A fence-marker line WITH trailing text, encountered while a block
+// is open, does not close the block; it is preserved as block content
+// instead, so no input text is ever silently dropped (SPEC FR1).
+func isClosingFenceLine(line string) bool {
+	return strings.TrimSpace(line) == "```"
 }
 
 var headingRe = regexp.MustCompile(`^(#{1,3})\s+(.*)$`)
@@ -155,7 +165,7 @@ func (l *markdownList) render() string {
 	}
 	var items strings.Builder
 	for _, item := range l.items {
-		items.WriteString(fmt.Sprintf(`<li style="margin:0 0 8px 0;">%s</li>`, renderInline(item)))
+		items.WriteString(fmt.Sprintf(`<li style="margin:0 0 8px 0;font-size:16px;line-height:1.8;color:#232A31;">%s</li>`, renderInline(item)))
 	}
 	return fmt.Sprintf(`<%s style="padding-left:24px;margin:8px 0;">%s</%s>`, tag, items.String(), tag)
 }
@@ -189,14 +199,17 @@ func renderParagraph(lines []string) string {
 }
 
 // renderCodeBlock renders a fenced block's lines verbatim (escaped, never
-// inline-parsed) inside a <pre> element (AC-4).
+// inline-parsed) inside a <pre> element (AC-4). The element declares the
+// on-surface text color (AC-2) and horizontal overflow scrolling (AC-1), so
+// a long line scrolls inside the block instead of blowing out the mail
+// column.
 func renderCodeBlock(lines []string) string {
 	escaped := make([]string, len(lines))
 	for i, l := range lines {
 		escaped[i] = html.EscapeString(l)
 	}
 	return fmt.Sprintf(
-		`<pre style="background-color:#EDF1F5;padding:16px;font-size:13px;line-height:1.6;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;border-radius:4px;margin:8px 0;">%s</pre>`,
+		`<pre style="background-color:#EDF1F5;color:#232A31;padding:16px;font-size:13px;line-height:1.6;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;border-radius:4px;margin:8px 0;overflow-x:auto;">%s</pre>`,
 		strings.Join(escaped, "\n"),
 	)
 }
@@ -268,23 +281,28 @@ func renderBold(content string) string {
 }
 
 // parseLink recognizes a "[text](href)" construct starting at s[0]=='['.
-// consumed is the number of bytes of s the construct occupies. When href
-// does not parse as an absolute http/https URL (NFR2), the construct is not
-// treated as a link at all: it is rendered as escaped plain text instead of
-// emitting an <a> element.
+// consumed is the number of bytes of s the construct occupies. The
+// destination may itself contain balanced parentheses (AC-4, e.g.
+// "https://example.com/a(b)"); when it cannot be terminated (unbalanced),
+// ok is false and the caller falls through to plain-text handling, so the
+// whole construct ends up as escaped plain text rather than a broken link.
+// When href does not parse as an absolute http/https URL (NFR2), the
+// construct is not treated as a link at all: it is rendered as escaped
+// plain text instead of emitting an <a> element.
 func parseLink(s string) (rendered string, consumed int, ok bool) {
 	closeBracket := strings.IndexByte(s, ']')
 	if closeBracket < 0 || closeBracket+1 >= len(s) || s[closeBracket+1] != '(' {
 		return "", 0, false
 	}
-	closeParenRel := strings.IndexByte(s[closeBracket+2:], ')')
-	if closeParenRel < 0 {
+	destStart := closeBracket + 2
+	destEnd, found := findLinkDestinationEnd(s[destStart:])
+	if !found {
 		return "", 0, false
 	}
-	closeParen := closeBracket + 2 + closeParenRel
+	closeParen := destStart + destEnd
 
 	linkText := s[1:closeBracket]
-	href := s[closeBracket+2 : closeParen]
+	href := s[destStart:closeParen]
 	consumed = closeParen + 1
 
 	if !isHTTPURL(href) {
@@ -297,6 +315,28 @@ func parseLink(s string) (rendered string, consumed int, ok bool) {
 		html.EscapeString(linkText),
 	)
 	return rendered, consumed, true
+}
+
+// findLinkDestinationEnd scans s (the text immediately following a link's
+// opening "(") for the ')' that balances it, treating any '(' / ')' pairs
+// nested inside the destination as balanced (AC-4, e.g.
+// "https://example.com/a(b)"). It returns the index within s of that
+// balancing ')' and true, or ok=false when the destination never reaches
+// balance before the input ends (an unterminated/unbalanced destination).
+func findLinkDestinationEnd(s string) (end int, ok bool) {
+	depth := 1
+	for i := 0; i < len(s); i++ {
+		switch s[i] {
+		case '(':
+			depth++
+		case ')':
+			depth--
+			if depth == 0 {
+				return i, true
+			}
+		}
+	}
+	return 0, false
 }
 
 // isHTTPURL reports whether href parses as an absolute URL with scheme

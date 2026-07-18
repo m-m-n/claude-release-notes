@@ -295,3 +295,121 @@ func TestRenderMarkdown_EmptyInputRendersEmpty(t *testing.T) {
 		t.Errorf("expected empty output for empty input, got: %s", html)
 	}
 }
+
+// TestRenderMarkdown_CodeBlockDeclaresHorizontalOverflowScroll references
+// AC-1: the rendered code block's inline style declares horizontal overflow
+// scrolling, so a long line does not blow out the 600px mail column.
+func TestRenderMarkdown_CodeBlockDeclaresHorizontalOverflowScroll(t *testing.T) {
+	html := renderMarkdown("```\ncode line\n```")
+	if !strings.Contains(html, "overflow-x:auto") {
+		t.Errorf("expected overflow-x:auto on code block in: %s", html)
+	}
+}
+
+// TestRenderMarkdown_ListItemsDeclareBodyTypography references AC-2: each
+// list item declares the body typography (16px / 1.8 / on-surface #232A31)
+// inline, since mail clients are unreliable about CSS inheritance.
+func TestRenderMarkdown_ListItemsDeclareBodyTypography(t *testing.T) {
+	html := renderMarkdown("- first\n- second")
+	want := "font-size:16px;line-height:1.8;color:#232A31"
+	if got := strings.Count(html, want); got != 2 {
+		t.Errorf("expected each of the 2 list items to declare %q inline, got %d occurrences in: %s", want, got, html)
+	}
+}
+
+// TestRenderMarkdown_CodeBlockDeclaresOnSurfaceTextColor references AC-2:
+// the fenced code block declares the on-surface text color (#232A31)
+// inline, matching the mockup.
+func TestRenderMarkdown_CodeBlockDeclaresOnSurfaceTextColor(t *testing.T) {
+	html := renderMarkdown("```\ncode line\n```")
+	if !strings.Contains(html, "color:#232A31") {
+		t.Errorf("expected on-surface text color declared on code block in: %s", html)
+	}
+}
+
+// TestRenderMarkdown_ClosingFenceLineWithTrailingTextIsPreservedAsContent
+// references AC-3: inside an open fenced block, a line that starts with the
+// fence marker but carries trailing text does not close the block; its text
+// is preserved as block content, not dropped.
+func TestRenderMarkdown_ClosingFenceLineWithTrailingTextIsPreservedAsContent(t *testing.T) {
+	html := renderMarkdown("```\n``` still open\nreal close below\n```")
+	if !strings.Contains(html, "``` still open") {
+		t.Errorf("expected fence-marker line with trailing text preserved as content in: %s", html)
+	}
+	if !strings.Contains(html, "real close below") {
+		t.Errorf("expected content after the fence-like line preserved in: %s", html)
+	}
+	if got := strings.Count(html, "<pre"); got != 1 {
+		t.Errorf("expected exactly one code block (the fence-like line must not close it), got %d in: %s", got, html)
+	}
+}
+
+// TestRenderMarkdown_OpeningFenceInfoStringIsDiscarded references AC-3: an
+// opening fence's info string (e.g. a language hint) is discarded, never
+// rendered as block content.
+func TestRenderMarkdown_OpeningFenceInfoStringIsDiscarded(t *testing.T) {
+	html := renderMarkdown("```go\ncode line\n```")
+	if strings.Contains(html, "go") {
+		t.Errorf("expected opening fence info string discarded, got: %s", html)
+	}
+	if !strings.Contains(html, "code line") {
+		t.Errorf("expected code block content preserved in: %s", html)
+	}
+}
+
+// TestRenderMarkdown_FenceMarkerLineWithTrailingTextOutsideBlockOpensBlock
+// references AC-3: outside any open block, a fence-marker line with
+// trailing text (an info string) opens a code block, discarding the info
+// string, exactly like a bare fence marker would.
+func TestRenderMarkdown_FenceMarkerLineWithTrailingTextOutsideBlockOpensBlock(t *testing.T) {
+	html := renderMarkdown("``` trailing info\ncode\n```")
+	if !strings.Contains(html, "<pre") {
+		t.Fatalf("expected a code block to open in: %s", html)
+	}
+	if strings.Contains(html, "trailing info") {
+		t.Errorf("expected the opening fence's info string discarded, got: %s", html)
+	}
+	if !strings.Contains(html, "code") {
+		t.Errorf("expected code block content preserved in: %s", html)
+	}
+}
+
+// TestRenderMarkdown_FenceRoundTripLosesNoContent references AC-3: across
+// an opening fence with an info string, a fence-marker line with trailing
+// text inside the block, and a real closing fence, every piece of non-fence
+// content survives (FR1 "never dropped").
+func TestRenderMarkdown_FenceRoundTripLosesNoContent(t *testing.T) {
+	html := renderMarkdown("```go\n``` inner marker line\nreal content\n```")
+	for _, want := range []string{"inner marker line", "real content"} {
+		if !strings.Contains(html, want) {
+			t.Errorf("expected content %q preserved with zero loss, got: %s", want, html)
+		}
+	}
+}
+
+// TestRenderMarkdown_LinkWithBalancedParenthesesInURL references AC-4: a
+// link destination containing balanced parentheses renders as a link with
+// the full URL, rather than truncating at the first ')'.
+func TestRenderMarkdown_LinkWithBalancedParenthesesInURL(t *testing.T) {
+	html := renderMarkdown("see [docs](https://example.com/a(b))")
+	if !strings.Contains(html, `href="https://example.com/a(b)"`) {
+		t.Errorf("expected full URL with balanced parentheses in href, got: %s", html)
+	}
+	if !strings.Contains(html, "docs</a>") {
+		t.Errorf("expected link text preserved in: %s", html)
+	}
+}
+
+// TestRenderMarkdown_UnbalancedLinkDestinationFallsBackToEscapedPlainText
+// references AC-4: when a link destination's parentheses cannot be
+// balanced (no terminating ')'), the whole construct renders as escaped
+// plain text instead of a broken/truncated link.
+func TestRenderMarkdown_UnbalancedLinkDestinationFallsBackToEscapedPlainText(t *testing.T) {
+	html := renderMarkdown("see [docs](https://example.com/a(b")
+	if strings.Contains(html, "<a ") || strings.Contains(html, "href=") {
+		t.Errorf("expected no <a> element for an unbalanced destination, got: %s", html)
+	}
+	if !strings.Contains(html, "https://example.com/a(b") {
+		t.Errorf("expected the construct preserved as escaped plain text, got: %s", html)
+	}
+}

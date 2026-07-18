@@ -117,7 +117,7 @@ var digestTemplate = template.Must(template.New("digest").Parse(`<!doctype html>
 {{end}}<div style="padding:24px;">
 <div style="font-size:18px;line-height:1.4;font-weight:700;color:#33658A;">{{.Version}}</div>
 <div style="font-size:13px;line-height:1.5;color:#5C6B7A;margin-top:8px;">{{.PublishedAt}}</div>
-<div style="margin-top:16px;">{{.BodyHTML}}</div>
+<div style="margin-top:16px;font-size:16px;line-height:1.8;color:#232A31;">{{.BodyHTML}}</div>
 </div>
 {{end}}<div style="height:1px;line-height:1px;font-size:0;background-color:#D9E1E8;">&nbsp;</div>
 <div style="padding:24px;">

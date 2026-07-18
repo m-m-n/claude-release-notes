@@ -193,6 +193,23 @@ func TestBuild_UsesCurrentCoolPaletteWithNoLegacyWarmHexes(t *testing.T) {
 	}
 }
 
+// TestBuild_BodyWrapperCarriesBodyTypographyAsFallback references AC-2's
+// design decision: the digest template's body wrapper also declares the
+// body typography (16px / 1.8 / on-surface #232A31) as a fallback
+// inheritance layer, in addition to the renderer declaring it explicitly on
+// each element.
+func TestBuild_BodyWrapperCarriesBodyTypographyAsFallback(t *testing.T) {
+	items := []Item{
+		{Version: "v1.0.0", PublishedAt: date(2026, 7, 16), Body: "本文"},
+	}
+
+	_, html := Build(items)
+
+	if !strings.Contains(html, "margin-top:16px;font-size:16px;line-height:1.8;color:#232A31;") {
+		t.Errorf("expected body wrapper to declare body typography as a fallback layer, got: %s", html)
+	}
+}
+
 // TestBuild_RendersMarkdownInReleaseBody references AC-1/AC-5 integration:
 // Build wires each release body through the Markdown renderer, so
 // Markdown-element styles (not just the digest chrome) appear in the
