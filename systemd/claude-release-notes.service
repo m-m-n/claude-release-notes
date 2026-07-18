@@ -3,5 +3,5 @@ Description=Claude Code release notes fetcher (single run)
 
 [Service]
 Type=oneshot
-# Adjust this path if the binary is installed elsewhere.
-ExecStart=%h/.local/bin/claude-release-notes
+# Set this to the actual install path of the binary.
+ExecStart=/usr/bin/claude-release-notes

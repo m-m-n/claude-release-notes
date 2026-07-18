@@ -4,16 +4,21 @@
 Gmail 経由でメール配信する単発実行の CLI ツール。スケジューリングは
 systemd のユーザータイマーに委譲する。
 
-## ビルド
+## ビルドとインストール
+
+deb パッケージを生成してインストールする。
+
+```sh
+make dpkg
+sudo dpkg -i build/claude-release-notes_0.1.0_amd64.deb
+```
+
+バイナリは `/usr/bin/claude-release-notes` にインストールされる。
+
+開発時のビルドのみ行う場合:
 
 ```sh
 go build ./...
-```
-
-インストール用のバイナリを生成する場合:
-
-```sh
-go build -o ~/.local/bin/claude-release-notes ./cmd/claude-release-notes
 ```
 
 ## 設定
@@ -40,7 +45,7 @@ gmail:
 mail:
   to: recipient@example.com
 github:
-  token: ghp_xxxxxxxxxxxxxxxxxxxx
+  token: github_pat_xxxxxxxxxxxxxxxxxxxx
 ```
 
 設定ファイルには認証情報が含まれるため、所有者のみ読み書き可能に制限する。
@@ -55,10 +60,29 @@ Google アカウントの「アプリ パスワード」ページから取得す
 
 https://myaccount.google.com/apppasswords
 
-### GitHub トークン
+### GitHub トークンの取得
 
-`github.token` には GitHub Personal Access Token を設定する。
-`anthropics/claude-code` の Releases API 呼び出しに使用する。
+`github.token` には GitHub Personal Access Token（Fine-grained token）を
+設定する。`anthropics/claude-code` の Releases API 呼び出しに使用する。
+
+1. Fine-grained token の発行ページを開く。
+
+   https://github.com/settings/personal-access-tokens/new
+
+2. 以下を設定して「Generate token」を押す。
+
+   | 項目 | 設定値 |
+   |------|--------|
+   | Token name | 任意（例: `claude-release-notes`） |
+   | Expiration | 任意の有効期限 |
+   | Repository access | **Public repositories (read-only)** |
+   | Permissions | 追加不要 |
+
+3. 表示されたトークン（`github_pat_` で始まる）を `config.yaml` の
+   `github.token` に設定する。トークンはこの画面でしか表示されない。
+
+有効期限が切れると取得が失敗するようになるため、失効時は再発行して
+`config.yaml` を更新する。
 
 ## 状態ファイル
 
@@ -69,9 +93,10 @@ https://myaccount.google.com/apppasswords
 
 ## systemd タイマーのインストール
 
-1. ビルドしたバイナリを配置する（例: `~/.local/bin/claude-release-notes`）。
-   `systemd/claude-release-notes.service` の `ExecStart` がこのパスと異なる
-   場合は書き換える。
+1. deb パッケージでバイナリをインストールしておく。
+   `systemd/claude-release-notes.service` の `ExecStart` は
+   `/usr/bin/claude-release-notes` を指す。別の場所に配置した場合は
+   書き換える。
 2. unit ファイルをユーザー unit ディレクトリにコピーする。
 
    ```sh
@@ -103,5 +128,5 @@ journalctl --user -u claude-release-notes.service
 タイマーを待たずに手動で実行する場合、インストール先のバイナリを直接実行する。
 
 ```sh
-~/.local/bin/claude-release-notes
+claude-release-notes
 ```
