@@ -85,29 +85,19 @@ func formatPublishedDate(t time.Time) string {
 	return t.In(jst).Format("2006-01-02") + " 公開"
 }
 
-// bodyHTML renders one release's translated body as HTML: HTML-escaped,
-// with blank lines split into paragraphs and single line breaks preserved
-// as <br>. An empty (or whitespace-only) body renders the placeholder text
-// instead of an empty section.
+// bodyHTML renders one release's translated body as HTML by running it
+// through the Markdown renderer (renderMarkdown). An empty (or
+// whitespace-only) body renders the placeholder text instead of an empty
+// section.
 func bodyHTML(body string) template.HTML {
 	if strings.TrimSpace(body) == "" {
 		return template.HTML(fmt.Sprintf(
-			`<p style="margin:0;font-size:16px;line-height:1.8;color:#6E675E;">%s</p>`,
+			`<p style="margin:0;font-size:16px;line-height:1.8;color:#5C6B7A;">%s</p>`,
 			template.HTMLEscapeString(emptyBodyPlaceholder),
 		))
 	}
 
-	paragraphs := strings.Split(body, "\n\n")
-	rendered := make([]string, len(paragraphs))
-	for i, p := range paragraphs {
-		escaped := template.HTMLEscapeString(p)
-		escaped = strings.ReplaceAll(escaped, "\n", "<br>")
-		rendered[i] = fmt.Sprintf(
-			`<p style="margin:0 0 16px 0;font-size:16px;line-height:1.8;color:#2B2620;">%s</p>`,
-			escaped,
-		)
-	}
-	return template.HTML(strings.Join(rendered, ""))
+	return template.HTML(renderMarkdown(body))
 }
 
 // digestTemplate renders the self-contained digest HTML: every style is an
@@ -116,22 +106,22 @@ func bodyHTML(body string) template.HTML {
 // sans-serif font stack, no external resources.
 var digestTemplate = template.Must(template.New("digest").Parse(`<!doctype html>
 <html>
-<body style="margin:0;padding:0;background-color:#F4F1EC;font-family:system-ui, sans-serif;">
+<body style="margin:0;padding:0;background-color:#EDF1F5;font-family:system-ui, sans-serif;">
 <div style="max-width:600px;margin:0 auto;padding:16px;">
-<div style="background-color:#FFFFFF;border:1px solid #E4DED4;">
-<div style="background-color:#C15F3C;color:#FFFFFF;padding:24px;">
+<div style="background-color:#FFFFFF;border:1px solid #D9E1E8;">
+<div style="background-color:#33658A;color:#FFFFFF;padding:24px;">
 <div style="font-size:20px;line-height:1.4;font-weight:700;">Claude Code リリースノート</div>
 <div style="font-size:13px;line-height:1.5;margin-top:8px;">anthropics/claude-code &middot; {{.ItemCount}} 件の新しいリリース</div>
 </div>
-{{range .Items}}{{if .Divider}}<div style="height:1px;line-height:1px;font-size:0;background-color:#E4DED4;">&nbsp;</div>
+{{range .Items}}{{if .Divider}}<div style="height:1px;line-height:1px;font-size:0;background-color:#D9E1E8;">&nbsp;</div>
 {{end}}<div style="padding:24px;">
-<div style="font-size:18px;line-height:1.4;font-weight:700;color:#C15F3C;">{{.Version}}</div>
-<div style="font-size:13px;line-height:1.5;color:#6E675E;margin-top:8px;">{{.PublishedAt}}</div>
+<div style="font-size:18px;line-height:1.4;font-weight:700;color:#33658A;">{{.Version}}</div>
+<div style="font-size:13px;line-height:1.5;color:#5C6B7A;margin-top:8px;">{{.PublishedAt}}</div>
 <div style="margin-top:16px;">{{.BodyHTML}}</div>
 </div>
-{{end}}<div style="height:1px;line-height:1px;font-size:0;background-color:#E4DED4;">&nbsp;</div>
+{{end}}<div style="height:1px;line-height:1px;font-size:0;background-color:#D9E1E8;">&nbsp;</div>
 <div style="padding:24px;">
-<div style="font-size:13px;line-height:1.5;color:#6E675E;">claude-release-notes により自動送信 &middot; 原文: GitHub Releases</div>
+<div style="font-size:13px;line-height:1.5;color:#5C6B7A;">claude-release-notes により自動送信 &middot; 原文: GitHub Releases</div>
 </div>
 </div>
 </div>
