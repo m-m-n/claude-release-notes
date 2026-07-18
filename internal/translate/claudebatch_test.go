@@ -83,6 +83,38 @@ func TestTranslate_PromptAssembly(t *testing.T) {
 	}
 }
 
+// TestTranslate_PromptInstructionMarkdownPreservation references AC-1: the
+// assembled prompt instructs the model that section content is Markdown,
+// that its syntax and structure must be reproduced unchanged, that only the
+// human-readable text is translated, and that code content (inline and
+// fenced) is left untranslated.
+func TestTranslate_PromptInstructionMarkdownPreservation(t *testing.T) {
+	sections := []string{"# Heading\n\nSome `inline code` and text."}
+
+	var capturedStdin string
+	tr := NewTranslator("fake-command")
+	tr.run = func(command, arg, stdin string) (string, error) {
+		capturedStdin = stdin
+		return wellFormedResponse([]string{"訳"}), nil
+	}
+
+	if _, err := tr.Translate(sections); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	for _, want := range []string{
+		"Markdown",
+		"structure",
+		"unchanged",
+		"inline code",
+		"fenced code",
+	} {
+		if !strings.Contains(capturedStdin, want) {
+			t.Fatalf("prompt missing markdown-preservation directive keyword %q in prompt: %q", want, capturedStdin)
+		}
+	}
+}
+
 // TestTranslate_OutputRecovery references AC-2: a well-formed fake response
 // is split into the same number of translations, in order, with delimiters
 // and padding whitespace removed.

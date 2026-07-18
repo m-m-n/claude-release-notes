@@ -86,6 +86,11 @@ delimiter lines in the form:
 Translate ONLY the content between each pair of delimiter lines into
 Japanese. Reproduce every delimiter line EXACTLY as given, unchanged, in the
 same order, with nothing else added before, between, or after them.
+
+The content of each section is Markdown. Reproduce its syntax and structure
+(headings, list markers, inline code, bold, links, fenced code blocks)
+exactly as given, unchanged. Translate only the human-readable text; leave
+the content inside inline code spans and fenced code blocks untranslated.
 `
 
 // buildPrompt assembles the full claude-batch prompt: the translation
