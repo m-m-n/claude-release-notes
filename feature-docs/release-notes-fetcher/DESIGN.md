@@ -2,7 +2,7 @@
 
 ## Decisions
 
-- Email layout: single centered column, max-width 600px, on a `canvas`
+- Email layout: single centered column, max-width 800px, on a `canvas`
   background with one `surface` card containing header / releases / footer.
   Mockup: design/mockups/screen-email-digest.html
 - Header: a `primary` band with the mail title (`heading-mail`, `on-primary`)
@@ -18,7 +18,7 @@
 - Subject line format: `Claude Code リリースノート: v1.4.0 ほか N 件`
   (single release: `Claude Code リリースノート: v1.4.0`).
 - Tokens: created `design-system/tokens.yaml` (no prior design system);
-  warm-neutral palette with a single terracotta accent.
+  cool-neutral palette with a single steel-blue accent.
 - Email-client constraint: CSS custom properties and `<style>` blocks are
   unreliable in Gmail — the implementation must inline literal token VALUES
   as `style=""` attributes (table-or-div single column, no external
@@ -27,19 +27,21 @@
 
 ## Rationale
 
-- 600px single column is the de-facto safe width across mail clients;
-  anything responsive-fancy risks breakage (NFR: readable on mobile clients —
-  a narrow single column reflows naturally).
+- 800px single column (widened from 600px per user direction after seeing
+  the delivered mail): the digest targets a single Gmail recipient, so the
+  classic 600px mail-safe convention is not binding; `max-width` still lets
+  narrow/mobile clients reflow to a single readable column.
 - Body 16px / line-height 1.8: the payload is long-form translated Japanese;
   reading comfort outranks density (REQUIREMENTS 6.1).
-- One accent color only (terracotta, matching Claude's brand family) keeps
-  the digest calm and makes version headings the only landmarks — the email
-  is scanned by version, then read linearly.
+- One accent color only (steel blue; cool base per user direction after
+  seeing the delivered mail) keeps the digest calm and makes version
+  headings the only landmarks — the email is scanned by version, then read
+  linearly.
 - Light palette fixed (no dark variant): dark-mode rendering of HTML mail is
   client-controlled and unreliable; a light card with 4.5:1+ text contrast
   degrades most gracefully.
-- Autonomous judgment calls (revisit via /em-workflow:design): terracotta
-  accent choice, footer wording, subject line format.
+- Autonomous judgment calls (revisit via /em-workflow:design): accent hue
+  within the cool palette, footer wording, subject line format.
 
 ## Open items
 
