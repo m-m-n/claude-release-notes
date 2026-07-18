@@ -210,6 +210,24 @@ func TestBuild_BodyWrapperCarriesBodyTypographyAsFallback(t *testing.T) {
 	}
 }
 
+// TestBuild_ContainerMaxWidthIs800px references AC-1/AC-2: the outer
+// container declares an 800px maximum width, and no 600px maximum-width
+// declaration remains anywhere in the generated HTML.
+func TestBuild_ContainerMaxWidthIs800px(t *testing.T) {
+	items := []Item{
+		{Version: "v1.0.0", PublishedAt: date(2026, 7, 16), Body: "本文"},
+	}
+
+	_, html := Build(items)
+
+	if !strings.Contains(html, "max-width:800px") {
+		t.Errorf("expected outer container to declare max-width:800px, got: %s", html)
+	}
+	if strings.Contains(html, "max-width:600px") {
+		t.Errorf("expected no max-width:600px declaration, got: %s", html)
+	}
+}
+
 // TestBuild_RendersMarkdownInReleaseBody references AC-1/AC-5 integration:
 // Build wires each release body through the Markdown renderer, so
 // Markdown-element styles (not just the digest chrome) appear in the

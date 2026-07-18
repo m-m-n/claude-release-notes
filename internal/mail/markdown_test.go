@@ -298,7 +298,7 @@ func TestRenderMarkdown_EmptyInputRendersEmpty(t *testing.T) {
 
 // TestRenderMarkdown_CodeBlockDeclaresHorizontalOverflowScroll references
 // AC-1: the rendered code block's inline style declares horizontal overflow
-// scrolling, so a long line does not blow out the 600px mail column.
+// scrolling, so a long line does not blow out the 800px mail column.
 func TestRenderMarkdown_CodeBlockDeclaresHorizontalOverflowScroll(t *testing.T) {
 	html := renderMarkdown("```\ncode line\n```")
 	if !strings.Contains(html, "overflow-x:auto") {

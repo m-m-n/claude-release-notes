@@ -107,7 +107,7 @@ func bodyHTML(body string) template.HTML {
 var digestTemplate = template.Must(template.New("digest").Parse(`<!doctype html>
 <html>
 <body style="margin:0;padding:0;background-color:#EDF1F5;font-family:system-ui, sans-serif;">
-<div style="max-width:600px;margin:0 auto;padding:16px;">
+<div style="max-width:800px;margin:0 auto;padding:16px;">
 <div style="background-color:#FFFFFF;border:1px solid #D9E1E8;">
 <div style="background-color:#33658A;color:#FFFFFF;padding:24px;">
 <div style="font-size:20px;line-height:1.4;font-weight:700;">Claude Code リリースノート</div>
