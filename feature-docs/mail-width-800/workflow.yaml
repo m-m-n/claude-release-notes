@@ -1,0 +1,71 @@
+schema_version: 1
+feature: mail-width-800
+created: 2026-07-18
+base_branch: main
+parent_branch: em-workflow/mail-width-800/integration
+
+project:
+  components:
+    main:
+      language: go
+      build_command: "go build ./..."
+      test_command: "go test ./..."
+      format_command: "gofmt -w ."
+      e2e_test_command: ""
+
+workflow:
+  - id: create-spec
+    artifacts: [REQUIREMENTS.md, SPEC.md]
+    status: completed
+    completed_at_commit: bf51be051752940ca3d3796643d31e7d0bf05498
+  - id: design
+    artifacts: [DESIGN.md, design/]
+    status: skipped
+    skipped_reason: "幅 800px は /em-workflow:design で決定済み（release-notes-fetcher の DESIGN.md が SSOT）。新たな視覚判断は不要"
+  - id: create-plan
+    artifacts: [IMPLEMENTATION.md, VERIFICATION.md, tasks/]
+    status: completed
+    completed_at_commit: bf51be051752940ca3d3796643d31e7d0bf05498
+  - id: implement
+    status: pending
+  - id: review
+    status: pending
+  - id: verify
+    status: pending
+    result: null
+    failed_items: []
+  - id: retrospect
+    status: pending
+
+tasks:
+  task0001:
+    title: Digest container width 800px
+    plan: tasks/task0001.md
+    files:
+      - internal/mail/build.go
+      - internal/mail/build_test.go
+      - internal/mail/markdown_test.go
+    skills: [design-impl]
+    domains: [ui]
+    complexity: low
+    requirements: [FR1, NFR1]
+    status: pending
+    notes: null
+
+review:
+  status: pending
+  rounds_completed: 0
+
+requirements:
+  FR1:
+    title: Digest container inline style max-width is 800px
+    status: ok
+    tbd_reason: null
+    tasks: [task0001]
+    tests: [TS-1, TS-2]
+  NFR1:
+    title: No other style values or dependencies change
+    status: ok
+    tbd_reason: null
+    tasks: [task0001]
+    tests: [TS-3]
