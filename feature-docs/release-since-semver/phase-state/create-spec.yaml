@@ -3,7 +3,7 @@ feature: release-since-semver
 phase: create-spec
 status: dispatching
 generation: 1
-base_revision: f5fbf2f1fe23c1dcb5e9c270398091c8e95ec0cf
+base_revision: 59943fe66a4387f75e19a6bd90f627d2f96ed010
 last_input_digest: sha256:541a76e236aea4165587a989221a1ecc8f66721fa3bafdc7865abf05899ac01f
 active_request_id: create-spec-run-0003
 packets:
@@ -62,10 +62,16 @@ worker_runs:
     input_digest: sha256:c14ae32969f365388150fbcae4438da29b670ef4ab0eec4475ffdf531e6fbf6a
     output_digest: sha256:38753ed05882682e825da5b17a187a88bb55970ea13c53e0c45cbae7f30d56cd
   - request_id: create-spec-run-0003
-    status: dispatched
+    status: completed
     input_digest: sha256:541a76e236aea4165587a989221a1ecc8f66721fa3bafdc7865abf05899ac01f
-    output_digest: null
-artifacts: []
+    output_digest: sha256:ab308a7d0222584a62646e7fcdb2b5f39b7a5e8b03de2fd08961f442541ae9cc
+artifacts:
+  - path: feature-docs/release-since-semver/REQUIREMENTS.md
+    sha256: sha256:e3f29f060f4a7af31c19d362abcbf19f47984b897b30dbef61cf50e0bd07f19c
+    produced_by: create-spec-run-0003
+  - path: feature-docs/release-since-semver/SPEC.md
+    sha256: sha256:98b675498d1d1157aa9b53e510ce89825c5719d722f1c1877f285f6f29f65f7c
+    produced_by: create-spec-run-0003
 patches: []
 progress_fingerprint: sha256:a028dd34ffb1d61d7f9792f2a27b13ca8823bcd792717cbef425c81afc852a26
 stale_redispatch_count: 0
