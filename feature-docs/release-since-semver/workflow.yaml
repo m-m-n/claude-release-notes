@@ -87,7 +87,8 @@ workflow:
     skipped_reason: "変更範囲が internal/github の比較ロジックと internal/app の doc コメント、および旧 feature-docs の記述更新に限られる。メール HTML ビルダ（internal/mail）にも design-system/tokens.yaml の消費先にも触れないため、視覚設計の判断が発生しない"
   - id: create-plan
     artifacts: [IMPLEMENTATION.md, VERIFICATION.md, tasks/]
-    status: pending
+    status: completed
+    completed_at_commit: d0dda315b548a933a87894dfd56022fae00e4ffe
   - id: implement
     status: pending
     base_commit: null
@@ -100,7 +101,21 @@ workflow:
   - id: retrospect
     status: pending
 
-tasks: {}
+tasks:
+  task0001:
+    title: Align legacy release-notes-fetcher docs with current behaviour
+    plan: tasks/task0001.md
+    files:
+      - feature-docs/release-notes-fetcher/SPEC.md
+      - feature-docs/release-notes-fetcher/REQUIREMENTS.md
+      - feature-docs/release-notes-fetcher/tasks/task0003.md
+    skills: []
+    domains: [api-contract]
+    complexity: low
+    requirements: [FR8]
+    status: pending
+    notes: null
+    branch: null
 
 review:
   status: pending
@@ -152,20 +167,20 @@ requirements:
     tbd_reason: null
     excluded_reason: null
     tasks: []
-    tests: []
+    tests: [TS-1, TS-2, TS-10]
   FR7:
     title: "呼び出し側 doc コメントの整合"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
-    tests: []
+    tests: [TS-11]
   FR8:
     title: "旧 feature-docs/release-notes-fetcher/ の記述更新"
     status: ok
     tbd_reason: null
     excluded_reason: null
-    tasks: []
+    tasks: [task0001]
     tests: [TS-9]
   NFR1:
     title: "依存を増やさない"
@@ -173,14 +188,14 @@ requirements:
     tbd_reason: null
     excluded_reason: null
     tasks: []
-    tests: []
+    tests: [TS-12]
   NFR2:
     title: "GitHub API リクエストの有界性"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
-    tests: []
+    tests: [TS-4]
   NFR3:
     title: "秘匿情報を漏らさないエラー"
     status: ok
