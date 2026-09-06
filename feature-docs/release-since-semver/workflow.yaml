@@ -79,35 +79,27 @@ project:
 workflow:
   - id: create-spec
     artifacts: [REQUIREMENTS.md, SPEC.md]
-    status: completed
-    completed_at_commit: dc7ed008a2cfd7ea473582ab9db5b494ccd7fd2e
+    status: needs_update
+    completed_at_commit: null
   - id: design
     artifacts: [DESIGN.md, design/]
     status: skipped
     skipped_reason: "変更範囲が internal/github の比較ロジックと internal/app の doc コメント、および旧 feature-docs の記述更新に限られる。メール HTML ビルダ（internal/mail）にも design-system/tokens.yaml の消費先にも触れないため、視覚設計の判断が発生しない"
   - id: create-plan
     artifacts: [IMPLEMENTATION.md, VERIFICATION.md, tasks/]
-    status: completed
-    completed_at_commit: d0dda315b548a933a87894dfd56022fae00e4ffe
+    status: pending
+    completed_at_commit: null
   - id: implement
-    status: completed
+    status: pending
     base_commit: 97e11f7b0acecfe45988bede93ff859ea6c23a70
-    completed_at_commit: 4594590335d56b3dbef9e9e7d568ba71f3a96fa2
+    completed_at_commit: null
   - id: review
-    status: completed
-    completed_at_commit: 5e776d4e5374f218c9f7e77d4534f014df6dae8a
+    status: pending
+    completed_at_commit: null
   - id: verify
-    status: failed
-    result: fail
-    failed_items:
-      - id: TS-11
-        category: spec
-        note: >-
-          FR7 requires the ReleaseFetcher.Since doc comment in internal/app to
-          state semver comparison, single-page boundedness and the empty-slice
-          meaning. It states the latter two but describes newness only as
-          "newer than version". VERIFICATION.md MT-3 reads this exact comment;
-          review round 1 finding 8eee8117e5f072ef reports the same gap.
+    status: pending
+    result: null
+    failed_items: []
   - id: retrospect
     status: pending
 
@@ -129,7 +121,7 @@ tasks:
     branch: em-workflow/release-since-semver/task0001
 
 review:
-  status: completed
+  status: pending
   rounds_completed: 1
   plan:
     floor: [comprehensive, architecture, spec]
