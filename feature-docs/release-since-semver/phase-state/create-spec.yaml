@@ -1,11 +1,11 @@
 schema_version: 1
 feature: release-since-semver
 phase: create-spec
-status: dispatching
+status: completed
 generation: 1
-base_revision: 59943fe66a4387f75e19a6bd90f627d2f96ed010
+base_revision: ee43fd79eadf2eb36a98cccfdd1ff9118b681d91
 last_input_digest: sha256:541a76e236aea4165587a989221a1ecc8f66721fa3bafdc7865abf05899ac01f
-active_request_id: create-spec-run-0003
+active_request_id: null
 packets:
   release-since-semver-q0001:
     status: answered
