@@ -114,7 +114,7 @@ tasks:
     domains: [api-contract]
     complexity: low
     requirements: [FR8]
-    status: in_progress
+    status: merged
     notes: null
     branch: em-workflow/release-since-semver/task0001
 
