@@ -39,8 +39,9 @@ type StateStore interface {
 type ReleaseFetcher interface {
 	// Latest returns the newest non-draft, non-prerelease release.
 	Latest() (github.Release, error)
-	// Since returns all non-draft, non-prerelease releases newer than
-	// version, newest first; empty slice when up to date.
+	// Since returns the non-draft, non-prerelease releases newer than
+	// version, newest first, bounded to one listing page; empty slice
+	// when up to date.
 	Since(version string) ([]github.Release, error)
 }
 

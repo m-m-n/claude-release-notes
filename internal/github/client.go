@@ -7,13 +7,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 )
 
 const (
 	defaultBaseURL = "https://api.github.com"
 	releasesPath   = "/repos/anthropics/claude-code/releases"
-	perPage        = 30
+	// perPage bounds one listing page and, because Since reads only the
+	// first page, also caps how many releases a single run can deliver.
+	perPage        = 10
 	requestTimeout = 15 * time.Second
 )
 
@@ -78,32 +82,80 @@ func (c *Client) Latest() (Release, error) {
 	}
 }
 
-// Since returns all non-draft, non-prerelease releases newer than version,
-// newest first. Collection walks pages newest to oldest and stops
-// (exclusive) at the first release whose tag name equals version. If
-// version is never found, all listed (filtered) releases are returned.
+// Since returns the non-draft, non-prerelease releases newer than version,
+// newest first. It reads only the first listing page, so at most perPage
+// releases are ever returned.
+//
+// "Newer" is a semantic-version comparison of tag names, not a search for
+// version itself: upstream deletes releases, so the stored version is
+// routinely absent from the listing, and an identity match would then find
+// no stopping point. Tags that do not parse as vMAJOR.MINOR.PATCH are
+// treated as not newer and skipped.
 func (c *Client) Since(version string) ([]Release, error) {
+	stored, ok := parseVersion(version)
+	if !ok {
+		return nil, fmt.Errorf("github: unparsable stored version %q", version)
+	}
+
+	releases, err := c.fetchPage(1)
+	if err != nil {
+		return nil, err
+	}
+
 	result := []Release{}
-	page := 1
-	for {
-		releases, err := c.fetchPage(page)
-		if err != nil {
-			return nil, err
+	for _, r := range releases {
+		if r.Draft || r.Prerelease {
+			continue
 		}
-		if len(releases) == 0 {
-			return result, nil
+		v, ok := parseVersion(r.TagName)
+		if !ok {
+			continue
 		}
-		for _, r := range releases {
-			if r.TagName == version {
-				return result, nil
-			}
-			if r.Draft || r.Prerelease {
-				continue
-			}
+		if isNewer(v, stored) {
 			result = append(result, toRelease(r))
 		}
-		page++
 	}
+	return result, nil
+}
+
+// version is a parsed vMAJOR.MINOR.PATCH tag name.
+type version struct {
+	major, minor, patch int
+}
+
+// parseVersion parses a "vMAJOR.MINOR.PATCH" tag name, with the leading "v"
+// optional. It reports false for every other shape, including tags carrying
+// a pre-release or build suffix.
+func parseVersion(tag string) (version, bool) {
+	parts := strings.Split(strings.TrimPrefix(tag, "v"), ".")
+	if len(parts) != 3 {
+		return version{}, false
+	}
+
+	nums := make([]int, len(parts))
+	for i, p := range parts {
+		// Atoi accepts a leading sign, which is not a version component.
+		if p == "" || (p[0] != '0' && !(p[0] >= '1' && p[0] <= '9')) {
+			return version{}, false
+		}
+		n, err := strconv.Atoi(p)
+		if err != nil {
+			return version{}, false
+		}
+		nums[i] = n
+	}
+	return version{major: nums[0], minor: nums[1], patch: nums[2]}, true
+}
+
+// isNewer reports whether a is strictly newer than b.
+func isNewer(a, b version) bool {
+	if a.major != b.major {
+		return a.major > b.major
+	}
+	if a.minor != b.minor {
+		return a.minor > b.minor
+	}
+	return a.patch > b.patch
 }
 
 func toRelease(r apiRelease) Release {
