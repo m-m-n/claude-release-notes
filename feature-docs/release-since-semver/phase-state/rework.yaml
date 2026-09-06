@@ -1,0 +1,87 @@
+schema_version: 1
+feature: release-since-semver
+phase: rework
+status: completed
+generation: 1
+base_revision: ee0905d0d0b6db6efebca3a442cb23f95cfdeaaf
+last_input_digest: sha256:3f33b02957fea203bba0105cc9bfb134863e088fecb5ebc79950c61548188f1d
+active_request_id: null
+packets:
+  rework-q0001:
+    status: answered
+    issued_at: "2026-09-07T06:40:00+09:00"
+    questions:
+      - question_id: rework.baseline-ordering
+        status: answered
+      - question_id: rework.write-path-invariant
+        status: answered
+answers:
+  rework.baseline-ordering:
+    packet_id: rework-q0001
+    answered_at: "2026-09-07T06:40:00+09:00"
+    source: user
+    answer_mode: single_select
+    selected_option_ids: [save-max]
+    freeform: null
+    normalized_answer: null
+  rework.write-path-invariant:
+    packet_id: rework-q0001
+    answered_at: "2026-09-07T06:40:00+09:00"
+    source: user
+    answer_mode: single_select
+    selected_option_ids: [filter-in-latest]
+    freeform: null
+    normalized_answer: null
+worker_runs:
+  - request_id: rework-run-0001
+    status: needs_user_input
+    input_digest: sha256:3f33b02957fea203bba0105cc9bfb134863e088fecb5ebc79950c61548188f1d
+    output_digest: null
+artifacts: []
+patches: []
+progress_fingerprint: null
+stale_redispatch_count: 0
+resolved_input_cache: {}
+last_error: >-
+  Deviation recorded, not a failure. The specification-change transition's
+  five steps (rework-planner-contract.md) name create-spec, create-plan,
+  implement and review, and are silent on verify. This rework was
+  verify-sourced and the verify step stood at status: failed with
+  failed_items: [TS-11]. Leaving it there would have made develop's
+  stop-condition 3 fire when the re-run reached verify again, deadlocking the
+  transition the same five steps exist to enable. The orchestrator therefore
+  also reset verify to status: pending with result: null and failed_items: [],
+  and preserved workflow.implement.base_commit unchanged as step 3 requires.
+  A second recorded fact: the transition's single spec_change record carries
+  one origin pair, but this dispatch had three inputs with two distinct
+  origins that reached the gate. origin_id below names the finding the
+  rework-planner identified as driving the transition; the other origin and
+  the unsynthesized verify item are named in reason.
+spec_change:
+  reason: >-
+    Two review round 1 findings, folded into this verify-sourced rework at the
+    user's explicit instruction, each require a SPEC.md sentence that rework
+    may never write. e54225d34fad496c (the saved baseline is the listing head,
+    not the semver maximum) collides with FR6's "preserves listing order
+    (newest first)" and with the state-file table's definition of
+    last_version; the user chose option save-max, so SPEC.md must state that
+    the persisted last_version is the semver-greatest release delivered in the
+    run, with FR6's result ordering left as listing order.
+    158915f71d03475b (the semver invariant is enforced on read but on no write
+    path) collides with FR4's read-side-only error contract; the user chose
+    option filter-in-latest, so SPEC.md must extend the latest-release
+    selection rule to skip tags that do not parse, and IMPLEMENTATION.md's
+    Shared Components row pinning Latest() as "Unchanged by this feature" must
+    be superseded.
+    The verify-sourced item TS-11 (FR7's doc comment omits the
+    semver-comparison statement) needed no SPEC change of its own and was
+    coverable as an ordinary rework task, but Invariant 9 makes the
+    specification-change transition create no task, so TS-11 is carried into
+    the re-planning rather than synthesized here. It must be covered by the
+    new plan.
+  origin_kind: review
+  origin_id: e54225d34fad496c
+  recorded_at_commit: ee0905d0d0b6db6efebca3a442cb23f95cfdeaaf
+  consumed: false
+  replan_authorized: true
+classification: []
