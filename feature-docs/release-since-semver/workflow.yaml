@@ -120,9 +120,14 @@ tasks:
     branch: em-workflow/release-since-semver/task0001
 
 review:
-  status: pending
+  status: in_progress
   rounds_completed: 0
-  plan: null
+  plan:
+    floor: [comprehensive, architecture, spec]
+    discretionary:
+      - perspective: security
+        reason: "diff に GitHub API クライアント（bearer token 保持、外部由来のタグ文字列のパース、保存済み状態を含むエラーメッセージ）が含まれるため。NFR3（秘匿情報を漏らさないエラー）の検証先でもある"
+    cross_validation: true
   perspectives: {}
   residual_critical_high: 0
   needs_rework: false
