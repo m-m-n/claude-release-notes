@@ -1,0 +1,190 @@
+schema_version: 1
+feature: release-since-semver
+created: 2026-09-06
+base_branch: main
+goal: |
+  実装に合わせて feature-docs を作る。
+
+  対象の実装は、anthropics/claude-code のリリースを取得する Since() のバージョン判定を、
+  保存済みタグとの完全一致からセムバー比較へ変更したもの。すでに integration ブランチの
+  コミット 13d0ac2 として存在する。この feature では新たな実装は行わず、既にある実装に
+  合わせてドキュメントを書く。
+
+  ## 変更が必要になった経緯
+
+  - 状態ファイル state.json に保存された最終配信バージョン v2.1.243 が GitHub 上から
+    削除され、Releases API が 404 を返すようになった。
+  - 旧 Since() はタグ名の完全一致でしか走査を止めない設計で、doc コメントにも
+    「version が見つからなければ列挙した全リリースを返す」と明記されていた。
+  - その結果、毎回 210 件（全 7 ページ）を取得し、210 セクション分をまとめて 1 回の
+    claude-batch 呼び出しに詰め込んで翻訳させた。モデルが 420 行の区切り行を完全再現
+    できず、"translate: missing begin delimiter for section 1" で失敗し続けた。
+  - 2026-08-25 の v2.1.243 配信を最後に、12 日間メール配信が止まっていた。
+    1 回の実行に 18〜50 分かかった末に失敗しており、claude-batch 側の起動失敗
+    （"waiting for claude code to become ready"、tmux socket エラー）も誘発していた。
+
+  ## 実装済みの変更（コミット 13d0ac2）
+
+  - internal/github/client.go
+    - Since() を「listing の 1 ページ目のみ取得 + タグ名のセムバー比較」に変更。
+      保存済みバージョンが削除されていても比較で順序が付くため壊れない。
+    - version 型（major/minor/patch）、parseVersion（vMAJOR.MINOR.PATCH のみ受理し、
+      prerelease/build 接尾辞や桁数違いは false）、isNewer を追加。
+    - 保存済みバージョンがパース不能な場合はエラーを返す（全件配信へのフォールバックはしない）。
+    - リリース側のタグがパース不能な場合は「新しくないもの」として黙って除外する。
+    - perPage を 30 から 10 に変更。1 ページしか読まないため、これが 1 回の実行で
+      配信されるリリース数の上限にもなる。
+  - internal/github/client_test.go
+    - 既存 3 テストを新仕様に更新（複数ページ前提を廃止、削除済みバージョンのケースを
+      「全件返す」から「比較で正しく絞る」に変更）。
+    - 追加: ページングを走査しないこと、per_page の値、パース不能タグのスキップ、
+      state 破損時のエラー、parseVersion / isNewer のテーブル駆動ユニットテスト。
+  - internal/app/app.go
+    - ReleaseFetcher.Since の doc コメントを 1 ページ上限の記述に更新。
+
+  ## 確認済みの挙動
+
+  実 API に対して Since("v2.1.243") を実行し、210 件から 10 件（v2.1.263〜v2.1.248）に
+  減ることを確認済み。go vet と go test ./... は全パッケージ通過。
+
+  ## 既知のトレードオフ
+
+  1 ページ 10 件の上限により、2 ページ目以降にある未配信リリースは配信されずに飛ぶ。
+  現時点では v2.1.244〜v2.1.247 が該当する。これは意図的な設計判断であり、
+  1 回の実行が扱うリリース数を有界にすることを優先した結果。
+
+  ## 既存ドキュメントとの関係
+
+  feature-docs/release-notes-fetcher/ が初期実装時の SDD 成果物として存在し、
+  以下が今回の実装と食い違った状態になっている。この feature でどう扱うかの判断が要る。
+
+  - SPEC.md の API Design が per_page=30&page=N と書いている
+  - REQUIREMENTS.md の基本フローが「それより新しいリリースを全件取得する」と書いている
+  - tasks/task0003.md の AC-1 / AC-4 が旧仕様の受け入れ条件を記述している
+parent_branch: em-workflow/release-since-semver/integration
+
+project:
+  license: MIT
+  design_system:
+    kind: em_workflow
+    paths: []
+  components:
+    main:
+      language: go
+      build_command: "go build ./..."
+      test_command: "go test ./..."
+      format_command: "gofmt -w ."
+      e2e_test_command: ""
+
+workflow:
+  - id: create-spec
+    artifacts: [REQUIREMENTS.md, SPEC.md]
+    status: completed
+    completed_at_commit: dc7ed008a2cfd7ea473582ab9db5b494ccd7fd2e
+  - id: design
+    artifacts: [DESIGN.md, design/]
+    status: skipped
+    skipped_reason: "変更範囲が internal/github の比較ロジックと internal/app の doc コメント、および旧 feature-docs の記述更新に限られる。メール HTML ビルダ（internal/mail）にも design-system/tokens.yaml の消費先にも触れないため、視覚設計の判断が発生しない"
+  - id: create-plan
+    artifacts: [IMPLEMENTATION.md, VERIFICATION.md, tasks/]
+    status: pending
+  - id: implement
+    status: pending
+    base_commit: null
+  - id: review
+    status: pending
+  - id: verify
+    status: pending
+    result: null
+    failed_items: []
+  - id: retrospect
+    status: pending
+
+tasks: {}
+
+review:
+  status: pending
+  rounds_completed: 0
+  plan: null
+  perspectives: {}
+  residual_critical_high: 0
+  needs_rework: false
+
+requirements:
+  FR1:
+    title: "セマンティックバージョン比較による「新しい」判定"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: [TS-1, TS-2, TS-3, TS-7]
+  FR2:
+    title: "タグ名のパース仕様"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: [TS-5, TS-6]
+  FR3:
+    title: "パース不能なタグはスキップ"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: [TS-5]
+  FR4:
+    title: "パース不能な保存済みバージョンはエラー"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: [TS-8]
+  FR5:
+    title: "1 ページのみ読む有界化"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: [TS-4]
+  FR6:
+    title: "draft / prerelease の除外と並び順"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: []
+  FR7:
+    title: "呼び出し側 doc コメントの整合"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: []
+  FR8:
+    title: "旧 feature-docs/release-notes-fetcher/ の記述更新"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: [TS-9]
+  NFR1:
+    title: "依存を増やさない"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: []
+  NFR2:
+    title: "GitHub API リクエストの有界性"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: []
+  NFR3:
+    title: "秘匿情報を漏らさないエラー"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: [TS-8]
