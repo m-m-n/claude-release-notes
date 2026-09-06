@@ -22,7 +22,9 @@ As the owner, I want new release notes fetched and emailed in Japanese three
 times a day, so that I stay up to date without manual checking.
 
 **Acceptance Criteria:**
-- [ ] Releases newer than the stored version are all fetched (paging as needed)
+- [ ] Releases newer than the stored version, decided by semantic-version
+      comparison of tag names, are fetched from the first listing page only,
+      so a single run delivers at most the per-page cap
 - [ ] All pending releases are sent in ONE HTML email, newest version first
 - [ ] The state file is updated only after the email is sent successfully
 - [ ] When there is no new release, the run exits 0 without sending anything
@@ -48,10 +50,15 @@ the next scheduled run retries automatically.
 ### Functional Requirements
 - **FR1:** Fetch releases from `GET /repos/anthropics/claude-code/releases`
   (GitHub REST API) with mandatory token authentication
-  (`Authorization: Bearer <token>`), following pagination, collecting every
-  release whose `tag_name` is newer than the stored version. Drafts and
-  prereleases are excluded. Ordering relies on the API's reverse-chronological
-  listing; collection stops at the first release equal to the stored version.
+  (`Authorization: Bearer <token>`), issuing exactly one request for the
+  first listing page (bounded by the per-page cap) and never walking
+  pagination. A release is collected when its `tag_name` is a newer
+  semantic version than the stored version — not by locating the stored
+  version in the listing by identity match — so a stored version absent
+  from the listing is a normal case where only the releases that compare
+  newer are collected, never the whole listing. Tags that do not parse as a
+  version are skipped. Drafts and prereleases are excluded. Ordering relies
+  on the API's reverse-chronological listing.
 - **FR2:** Persist the last delivered release `tag_name` in
   `${XDG_STATE_HOME:-~/.local/state}/claude-release-notes/state.json`. When the
   state file is absent (first run), process only the latest release. Write the
@@ -112,7 +119,7 @@ interface consumed by the pipeline so unit tests can substitute mocks.
 
 ```
 state.json ─┐
-            ├→ github.FetchNewer(lastVersion) → []Release
+            ├→ github.Since(lastVersion) → []Release
 config.yaml ┘         │
                       ▼
         translate.Translate(releases) → per-release Japanese text
@@ -129,7 +136,7 @@ config.yaml ┘         │
 External API only (no server):
 
 ```
-GET https://api.github.com/repos/anthropics/claude-code/releases?per_page=30&page=N
+GET https://api.github.com/repos/anthropics/claude-code/releases?per_page=10&page=1
 Headers:
   Authorization: Bearer {github.token}
   Accept: application/vnd.github+json
@@ -183,8 +190,9 @@ README.md                          # install & setup instructions
 ## Test Scenarios
 
 ### Unit Tests
-- [ ] TS-1: FR1 — given a stored version and a mocked paged API response, all
-      newer releases are returned and drafts/prereleases are skipped
+- [ ] TS-1: FR1 — given a stored version and a mocked single-page API
+      response, the releases that compare newer are returned newest first,
+      and drafts/prereleases are skipped
 - [ ] TS-2: FR2 — first run (no state file) yields only the latest release;
       state write is atomic and creates directories as needed
 - [ ] TS-3: FR3 — valid config parses; each missing required key produces an
@@ -206,8 +214,8 @@ None (external systems mocked; see test/README.md).
 
 ### Edge Cases
 - [ ] State file exists but its version no longer appears in the API listing
-      (e.g. very old): fetch stops at pagination end; all listed releases are
-      treated as new
+      (e.g. very old): a normal success path, returning only the releases
+      that compare newer, never the whole listing
 - [ ] Release body is empty: section is rendered with an "(no notes)" marker,
       not dropped
 - [ ] claude-batch output missing a delimiter for one release: treated as a

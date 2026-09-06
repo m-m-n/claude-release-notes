@@ -1,0 +1,100 @@
+task_id: task0001
+baseline_failures: []          # go test ./... was fully green before any edit
+final_failures: []             # go test ./... is still fully green after all edits
+acceptance_tests:
+  AC-1:
+    tests: []
+    red_confirmed: true
+    red_reason: >-
+      No test harness exists for prose (IMPLEMENTATION.md D3); the check is
+      textual, per Test Notes. Pre-edit SPEC.md stated the stale behaviour at
+      all six locations (read via the Read tool before any edit): US1 bullet
+      said "are all fetched (paging as needed)"; FR1 said "following
+      pagination, collecting every release ... equal to the stored version";
+      the Data Flow diagram named `github.FetchNewer(lastVersion)`; API
+      Design used `per_page=30&page=N`; TS-1 said "a mocked paged API
+      response, all newer releases are returned"; the first Edge Case said
+      "fetch stops at pagination end; all listed releases are treated as
+      new". Post-edit, each location was rewritten to the canonical
+      statements listed in the task plan's target-location table (verified
+      by re-reading the diff against that table) and the stale-marker grep
+      in AC-4 returns no hits inside SPEC.md.
+  AC-2:
+    tests: []
+    red_confirmed: true
+    red_reason: >-
+      Same textual-check basis as AC-1, for REQUIREMENTS.md (Japanese).
+      Pre-edit text at all five locations stated the stale behaviour: UC01
+      step 2 said "それより新しいリリースを全件取得する"; F01 said
+      "新しい順にページングし、...すべて収集する"; 8.2 had a single
+      undifferentiated "（ページング対応）" bullet; the 10.1 risk row's
+      mitigation was "問題が出たらバージョンごと分割方式へ変更"; 11.1's
+      second checkbox said "...だけが全件取得される". Post-edit, each now
+      states first-page-only / semver-comparison per the target-location
+      table, in Japanese, with section numbering (3.2, 4.2, 8.2, 10.1, 11.1)
+      and table structure unchanged (verified by diff: only cell/line
+      content changed, no row added/removed, no renumbering).
+  AC-3:
+    tests: []
+    red_confirmed: true
+    red_reason: >-
+      Same textual-check basis as AC-1, for tasks/task0003.md. Pre-edit:
+      Design item 5 described a page-walk stopping at an equal tag name or
+      exhausting pagination; AC-1 said "across a multi-page mocked listing";
+      AC-4 said "returns all listed (filtered) releases"; Test Notes said
+      "Pagination across >= 2 pages is the core case (AC-1)". Post-edit, item
+      5 and AC-1/AC-4/Test Notes state first-page-only / comparison-based
+      selection per the target-location table, with the AC numbering (AC-1,
+      AC-4) and Design item numbering (item 5) unchanged (verified by diff:
+      only the four locations' text changed).
+  AC-4:
+    tests:
+      - "grep -inE 'FetchNewer|per_page=30' SPEC.md REQUIREMENTS.md tasks/task0003.md IMPLEMENTATION.md"
+      - "grep -in '全件取得' SPEC.md REQUIREMENTS.md tasks/task0003.md IMPLEMENTATION.md"
+      - "grep -inE 'paging as needed|all fetched' SPEC.md REQUIREMENTS.md tasks/task0003.md IMPLEMENTATION.md"
+      - "grep -inE 'stops? at|equal to (the )?(stored|version)|停止|一致' SPEC.md tasks/task0003.md REQUIREMENTS.md"
+      - "grep -inE 'returns all listed|yields all|すべて.*取得され' SPEC.md REQUIREMENTS.md tasks/task0003.md IMPLEMENTATION.md"
+    red_confirmed: true
+    red_reason: >-
+      Run before any edit (from the worktree root, over the four target
+      files): `FetchNewer` hit SPEC.md Data Flow line ("github.FetchNewer
+      (lastVersion)"); `per_page=30` hit SPEC.md API Design line; `全件取得`
+      hit REQUIREMENTS.md lines 58 and 231; `paging as needed`/`all fetched`
+      both hit SPEC.md's US1 bullet. Re-run after all edits: every pattern
+      returned no match (grep exit code 1) across all four files.
+  AC-5:
+    tests: []
+    red_confirmed: false
+    red_reason: >-
+      Preservation criterion, not a behavioural change — there is no red
+      state to observe (tdd-testing: "the behavior genuinely pre-existed").
+      Verified by `git diff`: tasks/task0003.md "Files to Create" (mentions
+      pagination generically) and Design item 4 (Latest's pagination) do not
+      appear in the diff at all — untouched. REQUIREMENTS.md 8.2 kept its
+      original line "- GitHub: `GET /repos/anthropics/claude-code/releases`
+      （ページング対応）" byte-for-byte (diff shows only a new line added
+      above it, the original line itself carries no diff marker).
+  AC-6:
+    tests: []
+    red_confirmed: false
+    red_reason: >-
+      Verified via `git status --short` after all commits: exactly
+      feature-docs/release-notes-fetcher/{SPEC.md,REQUIREMENTS.md,
+      IMPLEMENTATION.md,tasks/task0003.md} are modified. No file under
+      feature-docs/release-notes-fetcher/reviews/ or phase-state/, and no
+      file under internal/, cmd/, or test/, appears in the diff.
+  AC-7:
+    tests: []
+    red_confirmed: true
+    red_reason: >-
+      Pre-edit, the `github.Client` row's `Since(version)` post-condition
+      read "all non-draft, non-prerelease releases newer than `version`,
+      newest first, following pagination; empty slice when up to date" —
+      stale (implies unbounded pagination). Post-edit it reads "the
+      non-draft, non-prerelease releases from the first listing page only
+      that compare as a newer semantic version than `version`, newest
+      first; empty slice when up to date". `git diff` on this file shows
+      exactly one changed line (that cell's Since sentence); the Latest()
+      half of the same cell, the other four Shared Components rows, and
+      every task attribution are absent from the diff, i.e. byte-identical
+      to pre-task state.
