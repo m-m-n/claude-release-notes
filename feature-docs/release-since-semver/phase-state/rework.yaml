@@ -82,6 +82,6 @@ spec_change:
   origin_kind: review
   origin_id: e54225d34fad496c
   recorded_at_commit: ee0905d0d0b6db6efebca3a442cb23f95cfdeaaf
-  consumed: false
+  consumed: true
   replan_authorized: true
 classification: []
