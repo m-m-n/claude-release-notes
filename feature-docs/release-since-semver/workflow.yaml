@@ -79,8 +79,8 @@ project:
 workflow:
   - id: create-spec
     artifacts: [REQUIREMENTS.md, SPEC.md]
-    status: needs_update
-    completed_at_commit: null
+    status: completed
+    completed_at_commit: cee7584afd3c1c8dfc04e8a3654b8cbcdcb45f7d
   - id: design
     artifacts: [DESIGN.md, design/]
     status: skipped
@@ -139,79 +139,107 @@ review:
 
 requirements:
   FR1:
-    title: "セマンティックバージョン比較による「新しい」判定"
+    title: "Newness decided by semantic version comparison"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-1, TS-2, TS-3, TS-7]
   FR2:
-    title: "タグ名のパース仕様"
+    title: "Tag parsing rules"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-5, TS-6]
   FR3:
-    title: "パース不能なタグはスキップ"
+    title: "Unparseable tags are skipped"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-5]
   FR4:
-    title: "パース不能な保存済みバージョンはエラー"
+    title: "An unparseable saved version is an error"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-8]
   FR5:
-    title: "1 ページのみ読む有界化"
+    title: "Bounded to a single page"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-4]
   FR6:
-    title: "draft / prerelease の除外と並び順"
+    title: "Draft/prerelease exclusion and ordering"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-1, TS-2, TS-10]
   FR7:
-    title: "呼び出し側 doc コメントの整合"
+    title: "Caller doc comment consistency"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-11]
   FR8:
-    title: "旧 feature-docs/release-notes-fetcher/ の記述更新"
+    title: "Update the older feature-docs/release-notes-fetcher/ documents"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: [task0001]
     tests: [TS-9]
+  FR9:
+    title: "The persisted baseline is the semver maximum of what was delivered"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: []
+  FR10:
+    title: "Unparseable tags are excluded from latest-release selection"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: []
+  FR11:
+    title: "Update the older feature-docs/ statements that FR9 and FR10 make stale"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: []
   NFR1:
-    title: "依存を増やさない"
+    title: "Dependency boundary"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-12]
   NFR2:
-    title: "GitHub API リクエストの有界性"
+    title: "Bounded GitHub API usage"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-4]
   NFR3:
-    title: "秘匿情報を漏らさないエラー"
+    title: "Errors that do not leak secrets"
     status: ok
     tbd_reason: null
     excluded_reason: null
     tasks: []
     tests: [TS-8]
+  NFR4:
+    title: "A single definition site for the semver comparison rule"
+    status: ok
+    tbd_reason: null
+    excluded_reason: null
+    tasks: []
+    tests: []
