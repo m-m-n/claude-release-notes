@@ -1,17 +1,29 @@
 schema_version: 1
 feature: release-since-semver
 phase: create-spec
-status: initialized
+status: dispatching
 generation: 1
-base_revision: 13d0ac20477dbafd508302ba8de2cd7193f8ff9a
-last_input_digest: null
-active_request_id: null
+base_revision: ebc28c4fa0d43c242e6b986950b8973dd962b441
+last_input_digest: sha256:24ea2706ae3065d207bf349535eb55c9074164c62091141d5475401b64fec403
+active_request_id: create-spec-run-0001
 packets: {}
 answers: {}
-worker_runs: []
+worker_runs:
+  - request_id: create-spec-run-0001
+    status: dispatched
+    input_digest: sha256:24ea2706ae3065d207bf349535eb55c9074164c62091141d5475401b64fec403
+    output_digest: null
 artifacts: []
 patches: []
 progress_fingerprint: null
 stale_redispatch_count: 0
-resolved_input_cache: {}
+resolved_input_cache:
+  design_system_candidates:
+    generation_digest: sha256:6b164c7ecfe2b4c0507274e66e38a0d6f7ecd5b1b4e31a0cd5589117d840671a
+    resolved_at_generation: 1
+    paths:
+      - design-system/tokens.yaml
+    digests:
+      design-system/tokens.yaml: sha256:aa164a9701cf3dbcc1b4a6edb340315f8d81f6148fc5a67fa331739d1b207538
+    truncated: false
 last_error: null
