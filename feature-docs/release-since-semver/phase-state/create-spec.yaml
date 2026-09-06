@@ -1,11 +1,11 @@
 schema_version: 1
 feature: release-since-semver
 phase: create-spec
-status: awaiting_answers
+status: dispatching
 generation: 2
-base_revision: 3c85bbcba122736b4cd8d0bddd5914dc809df4dc
-last_input_digest: sha256:140f9da465cc03480f115e446f82b2b7c9ccea110a529dd9c804b3778ecbd4a6
-active_request_id: null
+base_revision: e464fe743ab3730172135eb8630cf155e216c2d6
+last_input_digest: sha256:687f47f73b7a1e288cf715418e14f80ec2c78315906fbe973bd6ab8e8c126bf0
+active_request_id: create-spec-run-0006
 packets:
   release-since-semver-q0001:
     status: answered
@@ -30,6 +30,12 @@ packets:
     issued_at: '2026-09-07T08:36:00+09:00'
     questions:
     - question_id: baseline.semver-comparison-seam
+      status: answered
+  release-since-semver-q0004:
+    status: answered
+    issued_at: '2026-09-07T08:50:00+09:00'
+    questions:
+    - question_id: create-spec.artifact-overwrite
       status: answered
 answers:
   existing-docs.sixteenth-location:
@@ -86,6 +92,20 @@ answers:
     - export_selector_from_github
     freeform: null
     normalized_answer: null
+  create-spec.artifact-overwrite:
+    packet_id: release-since-semver-q0004
+    answered_at: '2026-09-07T08:50:00+09:00'
+    source: user
+    answer_mode: single_select
+    selected_option_ids:
+    - approve
+    freeform: null
+    normalized_answer: 'Approved: spec-writer may overwrite REQUIREMENTS.md and SPEC.md from their current
+      content. The divergence from the previously recorded spec-writer output is the orchestrator''s own
+      committed edits 97e11f7 (the 15->16 stale-location sweep) and b4d97a6 (SPEC AC-9 and the REQUIREMENTS
+      target table, two sites the first sweep missed). write_policy uses action replace_authorized with
+      the current digests, so spec-writer returns blocked rather than silently discarding those edits
+      if anything changed since.'
 worker_runs:
 - request_id: create-spec-run-0001
   status: needs_user_input
@@ -103,12 +123,20 @@ worker_runs:
   status: needs_user_input
   input_digest: sha256:140f9da465cc03480f115e446f82b2b7c9ccea110a529dd9c804b3778ecbd4a6
   output_digest: null
+- request_id: create-spec-run-0005
+  status: completed
+  input_digest: sha256:8cf1ed2a6845a9de48bba3a90265469e33066c6eb3d64ba515e267f87faefc60
+  output_digest: null
+- request_id: create-spec-run-0006
+  status: dispatching
+  input_digest: sha256:687f47f73b7a1e288cf715418e14f80ec2c78315906fbe973bd6ab8e8c126bf0
+  output_digest: null
 artifacts:
 - path: feature-docs/release-since-semver/REQUIREMENTS.md
-  sha256: sha256:98381c93e59d22919d1b12f1e173374f3205d18e04cf15335e84010135859748
+  sha256: sha256:aa26238a7f4974194e75457a540e4811ef74dc4bfc4375c1bd5ae8fd3924b549
   produced_by: create-spec-run-0003
 - path: feature-docs/release-since-semver/SPEC.md
-  sha256: sha256:98aa0d6409800116f0965f6d1944c8b6963d29cbf65baf937e8210e68f7d590b
+  sha256: sha256:8d9e845d7ccf6622f724e395f49c9baa98ec543363938ff2525fd24e60f01108
   produced_by: create-spec-run-0003
 patches: []
 progress_fingerprint: sha256:a028dd34ffb1d61d7f9792f2a27b13ca8823bcd792717cbef425c81afc852a26
