@@ -1,11 +1,11 @@
 schema_version: 1
 feature: release-since-semver
 phase: create-plan
-status: applying_patch
+status: completed
 generation: 1
-base_revision: 7070d88945cedb59e20d8886bd4c5896cfee66f0
+base_revision: d0dda315b548a933a87894dfd56022fae00e4ffe
 last_input_digest: sha256:5d37b8b25bcc2f12db9e1eba42807df3d72f9909b2ba267253d92c2db07ef63b
-active_request_id: create-plan-run-0001
+active_request_id: null
 packets: {}
 answers: {}
 worker_runs:
@@ -25,7 +25,7 @@ artifacts:
     produced_by: create-plan-run-0001
 patches:
   - patch_id: release-since-semver-p0001
-    status: validated
+    status: applied
     base_input_digest: sha256:5d37b8b25bcc2f12db9e1eba42807df3d72f9909b2ba267253d92c2db07ef63b
     base_workflow_blob: 722bc8266e6146598c1d7e9dd284ccc4e48403a7
 progress_fingerprint: null
