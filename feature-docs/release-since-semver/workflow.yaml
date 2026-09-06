@@ -114,9 +114,9 @@ tasks:
     domains: [api-contract]
     complexity: low
     requirements: [FR8]
-    status: pending
+    status: in_progress
     notes: null
-    branch: null
+    branch: em-workflow/release-since-semver/task0001
 
 review:
   status: pending
