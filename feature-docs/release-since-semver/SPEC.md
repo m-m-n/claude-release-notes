@@ -44,7 +44,7 @@ As a maintainer of this repository, I want the older `feature-docs/release-notes
 - **FR5 — Bounded to a single page:** `Since` fetches only the first page (`per_page=10`) and does not walk pagination. However old the saved version is, a single run returns at most 10 releases. Newer releases sitting on page 2 and beyond are left behind; this is accepted as a permanent design decision favouring boundedness.
 - **FR6 — Draft/prerelease exclusion and ordering:** Drafts and prereleases are included in neither the `Since` nor the `Latest` result. The result preserves listing order (newest first). When nothing matches, an empty slice is returned rather than an error.
 - **FR7 — Caller doc comment consistency:** The doc comment on `ReleaseFetcher.Since` in `internal/app` correctly states semver comparison, single-page boundedness, and that an empty slice means "already up to date".
-- **FR8 — Update the older `feature-docs/release-notes-fetcher/` documents:** Rewrite the 15 locations identified by the reference-impact scan to the current behaviour. The targets are: in `SPEC.md`, the US1 acceptance criterion ("paging as needed"), FR1, Data Flow (`FetchNewer`), API Design (`per_page`), TS-1, and Edge Cases; in `REQUIREMENTS.md`, the UC01 basic flow, F01, 8.2, the 10.1 risk mitigation, and 11.1; in `tasks/task0003.md`, Design 5, AC-1, AC-4, and Test Notes. `Latest` still walks pagination, so the "pagination" statement under `tasks/task0003.md`'s Files to Create is not stale and is out of scope.
+- **FR8 — Update the older `feature-docs/release-notes-fetcher/` documents:** Rewrite the 16 locations identified by the reference-impact scan to the current behaviour. The targets are: in `SPEC.md`, the US1 acceptance criterion ("paging as needed"), FR1, Data Flow (`FetchNewer`), API Design (`per_page`), TS-1, and Edge Cases; in `REQUIREMENTS.md`, the UC01 basic flow, F01, 8.2, the 10.1 risk mitigation, and 11.1; in `tasks/task0003.md`, Design 5, AC-1, AC-4, and Test Notes; in `IMPLEMENTATION.md`, the Shared Components row for the differential call. `Latest` still walks pagination, so the "pagination" statement under `tasks/task0003.md`'s Files to Create is not stale and is out of scope.
 
 ### Non-Functional Requirements
 
@@ -242,7 +242,7 @@ declared path that never materializes is not a violation.
 - [ ] Existing E2E tests pass without regression
 
 ### Documentation Tests
-- [ ] TS-9 (FR8, AC-9): None of the 15 locations in the older `feature-docs/release-notes-fetcher/` retain the previous behaviour's statements.
+- [ ] TS-9 (FR8, AC-9): None of the 16 locations in the older `feature-docs/release-notes-fetcher/` retain the previous behaviour's statements.
 
 ### Edge Cases
 - [ ] EC-1 (FR1, AC-4): The saved version has been removed from the listing — a success path; only versions that compare greater are returned, never the whole listing.

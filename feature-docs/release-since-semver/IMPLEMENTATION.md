@@ -103,11 +103,11 @@ verification that the existing implementation and its existing tests satisfy
 them. Their `tasks` arrays in `workflow.yaml` stay empty by intent — this is
 not an uncovered-requirement gap.
 
-### D2: FR8 is one task, not three
+### D2: FR8 is one task, not four
 
-The fifteen locations live in three files, but they are fifteen restatements
+The sixteen locations live in four files, but they are sixteen restatements
 of the same eight canonical statements (CB1–CB8) with a shared terminology
-decision. Splitting per file would give three implementers three independent
+decision. Splitting per file would give four implementers four independent
 chances to pick different wording for the same fact, and the resulting
 inconsistency is exactly the defect this feature exists to remove. The work is
 one implementer session's worth, and its acceptance criteria stay well inside
@@ -116,13 +116,13 @@ the size limit.
 ### D3: The documentation check is textual, not a test binary
 
 The project has no documentation-test harness, and adding one to police
-fifteen prose edits would be a new architectural element bought for a one-off
+sixteen prose edits would be a new architectural element bought for a one-off
 cleanup. FR8's acceptance is therefore a defined textual check — the absence of
-a fixed set of stale markers in the three target files, plus the presence of
+a fixed set of stale markers in the four target files, plus the presence of
 the canonical statements at each location. It is mechanical and repeatable
 without new tooling.
 
-### D4: The scope boundary is the enumerated fifteen locations
+### D4: The scope boundary is the enumerated sixteen locations
 
 SPEC.md FR8 enumerates the locations; the declared change set is derived from
 the task's `files`. Locations outside the enumeration are not silently added,
@@ -133,19 +133,14 @@ the observed change set contained in the declared one.
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| The rewrite spills beyond the fifteen locations and mangles unrelated sections of the older documents | Medium | Medium | Minimal-edit convention; the task plan lists the target locations and an explicit out-of-scope list |
+| The rewrite spills beyond the sixteen locations and mangles unrelated sections of the older documents | Medium | Medium | Minimal-edit convention; the task plan lists the target locations and an explicit out-of-scope list |
 | A still-true pagination statement (the latest-release call) is "corrected" into a false one | Medium | Medium | CB7 is a canonical statement; the task plan names the location and its acceptance criteria require it unchanged |
-| The three documents end up describing the same behaviour in inconsistent terms | Medium | Low | Single task (D2) plus the fixed terminology convention and CB1–CB8 |
+| The four documents end up describing the same behaviour in inconsistent terms | Medium | Low | Single task (D2) plus the fixed terminology convention and CB1–CB8 |
 | Historical records (past review round, phase state) get rewritten to match current behaviour | Low | High | Convention: historical records are never rewritten; named in the task's out-of-scope list |
-| Stale statements outside the enumerated fifteen remain in the older documents after this feature | High | Low | Reported as an open question rather than absorbed silently (D4) |
+| Stale statements outside the enumerated sixteen remain in the older documents after this feature | High | Low | Reported as an open question rather than absorbed silently (D4) |
 
 ## Open Questions
 
-- [ ] `feature-docs/release-notes-fetcher/IMPLEMENTATION.md` describes the
-      differential fetch as "following pagination" in its Shared Components
-      table. It is stale by CB1/CB2, but it is NOT one of the fifteen
-      locations FR8 enumerates, so it is out of scope here. Whether to fold it
-      into this feature or leave it to a follow-up needs a decision.
 - [ ] FR1–FR7 and NFR1–NFR3 have no implementing task by design (D1). If the
       workflow's traceability check treats an empty `tasks` array as a gap
       regardless of cause, that expectation needs restating for
