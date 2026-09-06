@@ -3,15 +3,15 @@ feature: release-since-semver
 phase: create-spec
 status: dispatching
 generation: 1
-base_revision: ebc28c4fa0d43c242e6b986950b8973dd962b441
-last_input_digest: sha256:24ea2706ae3065d207bf349535eb55c9074164c62091141d5475401b64fec403
+base_revision: 94cf8cb78b515e695378e0438587e4b0c25b4fcf
+last_input_digest: sha256:7de24d864c6fea8ae1ab49143cb343e0bfda01778ae0d3718de3506f19e25f65
 active_request_id: create-spec-run-0001
 packets: {}
 answers: {}
 worker_runs:
   - request_id: create-spec-run-0001
     status: dispatched
-    input_digest: sha256:24ea2706ae3065d207bf349535eb55c9074164c62091141d5475401b64fec403
+    input_digest: sha256:7de24d864c6fea8ae1ab49143cb343e0bfda01778ae0d3718de3506f19e25f65
     output_digest: null
 artifacts: []
 patches: []
@@ -25,5 +25,23 @@ resolved_input_cache:
       - design-system/tokens.yaml
     digests:
       design-system/tokens.yaml: sha256:aa164a9701cf3dbcc1b4a6edb340315f8d81f6148fc5a67fa331739d1b207538
+    truncated: false
+  reference_scan_targets:
+    generation_digest: sha256:46c5e6e08508e09477dd3836b683307a8524f0b40e6192513ad856dc25c37607
+    resolved_at_generation: 1
+    paths:
+      - internal/github/client.go
+      - internal/github/client_test.go
+      - internal/app/app.go
+      - feature-docs/release-notes-fetcher/SPEC.md
+      - feature-docs/release-notes-fetcher/REQUIREMENTS.md
+      - feature-docs/release-notes-fetcher/tasks/task0003.md
+    digests:
+      internal/github/client.go: sha256:4f0a459fbeca4eb2af4f01435b937d4add2e1bd058247ce8276f89c4a1b49d6f
+      internal/github/client_test.go: sha256:207a763796160871ef5bc4ee29ffc4ccd7cbddc2d05d6f3d79432874a5962a60
+      internal/app/app.go: sha256:6278bfcf7d3f58cf957ed5df6193afe87964e0aa828d103707fc0c0f38f877e7
+      feature-docs/release-notes-fetcher/SPEC.md: sha256:f7e1e6b3bcd077e2e874a3447f011294e8bbd5e51f94203f7767a9b45542b45b
+      feature-docs/release-notes-fetcher/REQUIREMENTS.md: sha256:dfae108a7524ce24448932c4225033de52cbc7b4e05cd1a1c53bad34709de494
+      feature-docs/release-notes-fetcher/tasks/task0003.md: sha256:8147fbd53f80e9fd0d209f5c01f1ddf701c2403d69dd72528aaaf0d3aa54d1f8
     truncated: false
 last_error: null
