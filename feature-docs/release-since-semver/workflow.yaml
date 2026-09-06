@@ -109,6 +109,7 @@ tasks:
       - feature-docs/release-notes-fetcher/SPEC.md
       - feature-docs/release-notes-fetcher/REQUIREMENTS.md
       - feature-docs/release-notes-fetcher/tasks/task0003.md
+      - feature-docs/release-notes-fetcher/IMPLEMENTATION.md
     skills: []
     domains: [api-contract]
     complexity: low

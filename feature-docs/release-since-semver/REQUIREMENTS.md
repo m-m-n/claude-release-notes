@@ -27,7 +27,7 @@ status: draft
 - `internal/github` の `(*Client).Since(version string) ([]Release, error)` の「新しい」判定と取得範囲
 - セマンティックバージョンのパースと比較を行う非公開ヘルパ
 - `internal/app` の `ReleaseFetcher.Since` の doc コメント
-- 旧 `feature-docs/release-notes-fetcher/` の記述更新（15 箇所）
+- 旧 `feature-docs/release-notes-fetcher/` の記述更新（16 箇所）
 
 **対象外**
 
@@ -113,7 +113,7 @@ graph LR
 - 旧 `feature-docs/release-notes-fetcher/` に現行仕様と一致しない記述が残っている
 
 **基本フロー**:
-1. 特定済みの 15 箇所を現行仕様に書き換える
+1. 特定済みの 16 箇所を現行仕様に書き換える
 2. ページング前提・同一性一致前提・`FetchNewer`・`per_page=30` の記述が残っていないことを確認する
 
 **代替フロー**:
@@ -135,7 +135,7 @@ graph LR
 | FR5 | 1 ページのみ読む有界化 | 先頭 1 ページのみを取得しページングを歩かない | 高 |
 | FR6 | draft / prerelease の除外と並び順 | draft・prerelease を除外し、リスティング順を保つ | 高 |
 | FR7 | 呼び出し側 doc コメントの整合 | `internal/app` の doc コメントを現行仕様に合わせる | 中 |
-| FR8 | 旧 `feature-docs/release-notes-fetcher/` の記述更新 | 特定済み 15 箇所を現行仕様に書き換える | 高 |
+| FR8 | 旧 `feature-docs/release-notes-fetcher/` の記述更新 | 特定済み 16 箇所を現行仕様に書き換える | 高 |
 
 ### 4.2 機能詳細
 
@@ -266,7 +266,7 @@ flowchart TD
 
 #### FR8: 旧 `feature-docs/release-notes-fetcher/` の記述更新
 
-**説明**: reference_impact が特定した 15 箇所を現行仕様に書き換える。
+**説明**: reference_impact が特定した 16 箇所を現行仕様に書き換える。
 
 **対象**:
 
@@ -396,7 +396,7 @@ Accept: application/vnd.github+json
 | リスク | 発生確率 | 影響度 | 対応策 |
 |--------|----------|--------|--------|
 | 1 実行あたり 10 件を超えるリリースがあった場合に配信漏れが起きる | 低 | 中 | 恒久受容とする（9.2） |
-| 旧ドキュメントの記述が現行仕様と乖離したまま残る | 中 | 中 | FR8 で 15 箇所を書き換え、AC-9 / TS-9 で確認する |
+| 旧ドキュメントの記述が現行仕様と乖離したまま残る | 中 | 中 | FR8 で 16 箇所を書き換え、AC-9 / TS-9 で確認する |
 
 ## 11. 成功基準
 
@@ -410,7 +410,7 @@ Accept: application/vnd.github+json
 - [ ] AC-6: 保存済みバージョンがどれだけ古くても、リクエストされるページは `page=1` のみで、`per_page` はコード上の上限値と一致する
 - [ ] AC-7: パース不能な保存済みバージョンではエラーになり、エラー文字列が問題の値を含む
 - [ ] AC-8: 非 2xx 応答のエラーがステータスを含み、トークン値を含まない
-- [ ] AC-9: 旧 `feature-docs/release-notes-fetcher/` の 15 箇所が現行仕様に更新され、ページング前提・同一性一致前提・`FetchNewer`・`per_page=30` の記述が残っていない
+- [ ] AC-9: 旧 `feature-docs/release-notes-fetcher/` の 16 箇所が現行仕様に更新され、ページング前提・同一性一致前提・`FetchNewer`・`per_page=30` の記述が残っていない
 
 ### 11.2 KPI
 
@@ -432,7 +432,7 @@ Accept: application/vnd.github+json
 - [ ] 境界値: TS-6（FR2）`parseVersion` のテーブル駆動テスト（境界: `v0.0.0`、符号付き、空要素、要素数違い）
 - [ ] 境界値: TS-7（FR1）`isNewer` のテーブル駆動テスト（major > minor > patch の優先順位、同値は false）
 - [ ] セキュリティ: TS-8（FR4/NFR3/AC-7/AC-8）パース不能な保存済みバージョンと非 2xx でのエラー内容
-- [ ] ドキュメント: TS-9（FR8/AC-9）旧 `feature-docs` の 15 箇所に旧仕様の記述が残っていないこと
+- [ ] ドキュメント: TS-9（FR8/AC-9）旧 `feature-docs` の 16 箇所に旧仕様の記述が残っていないこと
 - [ ] パフォーマンス: 本要件では専用のパフォーマンステストを設けない（リクエスト有界性は TS-4 で担保する）
 
 ## 13. 用語定義

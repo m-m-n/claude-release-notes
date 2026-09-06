@@ -15,13 +15,13 @@ worker_runs:
     output_digest: sha256:b3c3ff4f691e2e830dacc31eb214bb8033ea13f1f19eacfb3d9f788d5c4d9ec1
 artifacts:
   - path: feature-docs/release-since-semver/IMPLEMENTATION.md
-    sha256: sha256:1d28570cf6d37ce5191bd506f73de4e21d5f44e3d6f0fba6e90babcbed18bc70
+    sha256: sha256:5509e0d1d407dce262abf922cd578b2ad9d018f7b3f39a755f7014f208103ac4
     produced_by: create-plan-run-0001
   - path: feature-docs/release-since-semver/VERIFICATION.md
-    sha256: sha256:599517e97127bc7c9eb9a3bd19c8eb4d23e9e8d7b123ce31865badf386190f44
+    sha256: sha256:8b48775bf45c92aaf7218a04ab73e900f8e21ed8fcd4375ba9882e4722027d86
     produced_by: create-plan-run-0001
   - path: feature-docs/release-since-semver/tasks/task0001.md
-    sha256: sha256:61a893f1c5a0d2376f178833db340e52ec38c8c3a2d5a18883bbad0bb8b027c0
+    sha256: sha256:9e4ae0dd6ea7383eaab3de7ab1a723cd2ef863938f0f703246c08735e9e7d2a3
     produced_by: create-plan-run-0001
 patches:
   - patch_id: release-since-semver-p0001
@@ -42,3 +42,15 @@ last_error: >-
   which no field of this patch or of the three artifacts depends on. The user
   was shown this and chose to accept the result rather than re-dispatch.
   Rules 2-14 all passed.
+
+  Second, unrelated record. After this phase completed, the sixteenth stale
+  location (feature-docs/release-notes-fetcher/IMPLEMENTATION.md, the
+  github.Client Shared Components row) was folded into FR8 on the user's
+  decision — see create-spec.yaml's last_error for the full record. The
+  orchestrator edited IMPLEMENTATION.md (D2, D3, D4, two Risk rows, and the
+  removal of the now-resolved first Open Question), VERIFICATION.md (TS-9,
+  MT-1, MT-2, MT-5, MT-6) and tasks/task0001.md (Goal, Files to Modify, a new
+  target-location row #16, AC-4, AC-6, a new AC-7, Test Notes, Out of Scope)
+  in place, and appended the file to tasks.task0001.files in workflow.yaml.
+  No task was added or split; task0001 stays a single low-complexity task.
+  The artifact digests above were recomputed after these edits.
