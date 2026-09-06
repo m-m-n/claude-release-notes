@@ -275,6 +275,7 @@ flowchart TD
 | `feature-docs/release-notes-fetcher/SPEC.md` | US1 受け入れ基準（paging as needed）、FR1、Data Flow（FetchNewer）、API Design（per_page）、TS-1、Edge Cases |
 | `feature-docs/release-notes-fetcher/REQUIREMENTS.md` | UC01 基本フロー、F01、8.2、10.1 リスク対応策、11.1 |
 | `feature-docs/release-notes-fetcher/tasks/task0003.md` | Design 5、AC-1、AC-4、Test Notes |
+| `feature-docs/release-notes-fetcher/IMPLEMENTATION.md` | Shared Components の差分取得の行 |
 
 **ビジネスルール**:
 - `Latest` は現在もページングを行うため、`tasks/task0003.md` の Files to Create にある "pagination" の記述は陳腐化しておらず、対象外とする

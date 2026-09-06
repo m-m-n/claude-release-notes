@@ -31,7 +31,7 @@ As a recipient of the release-notes mail, I want only releases newer than the la
 As a maintainer of this repository, I want the older `feature-docs/release-notes-fetcher/` documents to describe the current behaviour, so that reading them does not lead to the paging-based or identity-match-based understanding.
 
 **Acceptance Criteria:**
-- [ ] AC-9: The 15 identified locations in `feature-docs/release-notes-fetcher/` are updated to the current behaviour, with no remaining statements assuming paging, identity match, `FetchNewer`, or `per_page=30`.
+- [ ] AC-9: The 16 identified locations in `feature-docs/release-notes-fetcher/` are updated to the current behaviour, with no remaining statements assuming paging, identity match, `FetchNewer`, or `per_page=30`.
 
 ## Technical Requirements
 
