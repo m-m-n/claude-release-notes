@@ -1,11 +1,11 @@
 schema_version: 1
 feature: release-since-semver
 phase: create-spec
-status: dispatching
+status: completed
 generation: 2
-base_revision: e464fe743ab3730172135eb8630cf155e216c2d6
+base_revision: cee7584afd3c1c8dfc04e8a3654b8cbcdcb45f7d
 last_input_digest: sha256:687f47f73b7a1e288cf715418e14f80ec2c78315906fbe973bd6ab8e8c126bf0
-active_request_id: create-spec-run-0006
+active_request_id: null
 packets:
   release-since-semver-q0001:
     status: answered
@@ -128,16 +128,16 @@ worker_runs:
   input_digest: sha256:8cf1ed2a6845a9de48bba3a90265469e33066c6eb3d64ba515e267f87faefc60
   output_digest: null
 - request_id: create-spec-run-0006
-  status: dispatching
+  status: completed
   input_digest: sha256:687f47f73b7a1e288cf715418e14f80ec2c78315906fbe973bd6ab8e8c126bf0
   output_digest: null
 artifacts:
 - path: feature-docs/release-since-semver/REQUIREMENTS.md
-  sha256: sha256:aa26238a7f4974194e75457a540e4811ef74dc4bfc4375c1bd5ae8fd3924b549
-  produced_by: create-spec-run-0003
+  sha256: sha256:e518813d1b73f462f62a33c44be7d061cc412e98dc38bbc0d95eb119b020d459
+  produced_by: create-spec-run-0006
 - path: feature-docs/release-since-semver/SPEC.md
-  sha256: sha256:8d9e845d7ccf6622f724e395f49c9baa98ec543363938ff2525fd24e60f01108
-  produced_by: create-spec-run-0003
+  sha256: sha256:62cf6de1bdbd302245e31b34b4511b0e6c43d19c526f918b6a5e7d41f4b9e2b2
+  produced_by: create-spec-run-0006
 patches: []
 progress_fingerprint: sha256:a028dd34ffb1d61d7f9792f2a27b13ca8823bcd792717cbef425c81afc852a26
 stale_redispatch_count: 0
@@ -216,5 +216,43 @@ last_error: 'Deviation recorded, not a failure. The reference-impact scan enumer
   internal/app test files added to reference_scan_targets because the two
 
   user decisions reach those layers.
+
+
+
+  Third record, generation 2 completion. Two facts about the validation of
+
+  create-spec-run-0006 (spec-writer).
+
+  (1) Rule R1 was NOT recomputed at return for this dispatch, and a
+
+  recomputation would have been meaningless. The spec-writer contract carries no
+
+  digest_inputs section, so the orchestrator constructed one, and it included
+
+  the two files spec-writer itself writes. A worker''s own output cannot serve as
+
+  its staleness input: the recomputed digest necessarily differs after any
+
+  successful write. Validation of this dispatch therefore rested on layer 4
+
+  (scope: git status showed exactly the two declared targets modified and
+
+  nothing else) and layer 5 (artifact: both files exist and their digests are
+
+  recorded above), plus a content check that the orchestrator''s own prior edits
+
+  survived - FR8 still reads 16 locations, SPEC AC-9 still reads 16, and
+
+  REQUIREMENTS.md''s FR8 target table still carries the IMPLEMENTATION.md row.
+
+  Any future spec-writer dispatch should exclude the write targets from
+
+  digest_inputs.
+
+  (2) spec-writer returned written_artifacts with sha256: null because its
+
+  dispatch had no hashing tool. The orchestrator computed both digests itself
+
+  and recorded them above, as layer 5 requires.
 
   '
