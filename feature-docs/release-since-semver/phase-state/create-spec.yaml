@@ -1,11 +1,11 @@
 schema_version: 1
 feature: release-since-semver
 phase: create-spec
-status: dispatching
+status: awaiting_answers
 generation: 2
-base_revision: 6bcac9a55801189d59574d550fb144605c5f3e68
+base_revision: 3c85bbcba122736b4cd8d0bddd5914dc809df4dc
 last_input_digest: sha256:140f9da465cc03480f115e446f82b2b7c9ccea110a529dd9c804b3778ecbd4a6
-active_request_id: create-spec-run-0004
+active_request_id: null
 packets:
   release-since-semver-q0001:
     status: answered
@@ -24,6 +24,12 @@ packets:
     issued_at: '2026-09-06T20:41:07+09:00'
     questions:
     - question_id: existing-docs.sixteenth-location
+      status: answered
+  release-since-semver-q0003:
+    status: answered
+    issued_at: '2026-09-07T08:36:00+09:00'
+    questions:
+    - question_id: baseline.semver-comparison-seam
       status: answered
 answers:
   existing-docs.sixteenth-location:
@@ -71,6 +77,15 @@ answers:
     - accept_permanently
     freeform: null
     normalized_answer: null
+  baseline.semver-comparison-seam:
+    packet_id: release-since-semver-q0003
+    answered_at: '2026-09-07T08:36:00+09:00'
+    source: user
+    answer_mode: single_select
+    selected_option_ids:
+    - export_selector_from_github
+    freeform: null
+    normalized_answer: null
 worker_runs:
 - request_id: create-spec-run-0001
   status: needs_user_input
@@ -85,7 +100,7 @@ worker_runs:
   input_digest: sha256:541a76e236aea4165587a989221a1ecc8f66721fa3bafdc7865abf05899ac01f
   output_digest: sha256:ab308a7d0222584a62646e7fcdb2b5f39b7a5e8b03de2fd08961f442541ae9cc
 - request_id: create-spec-run-0004
-  status: dispatching
+  status: needs_user_input
   input_digest: sha256:140f9da465cc03480f115e446f82b2b7c9ccea110a529dd9c804b3778ecbd4a6
   output_digest: null
 artifacts:
