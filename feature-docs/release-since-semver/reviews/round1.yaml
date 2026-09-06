@@ -1,0 +1,177 @@
+round: 1
+executed_at: "2026-09-06T21:20:00+09:00"
+scope:
+  review_mode: diff
+  base_commit: 15b20d929a6d55fa7d1a9cdf5fe36fafe8a0deb2
+  head_commit: 5e776d4e5374f218c9f7e77d4534f014df6dae8a
+  base_commit_deviation: >-
+    The develop-driven default base is workflow[implement].base_commit
+    (97e11f7b0acecfe45988bede93ff859ea6c23a70). That base was deliberately
+    widened to the merge-base with `main` for this round. The Go
+    implementation this feature documents was committed to the integration
+    branch as 13d0ac2 BEFORE create-spec ran, so the default base would have
+    excluded internal/github/client.go, internal/github/client_test.go and
+    internal/app/app.go from the review target entirely, leaving only prose
+    to review. The widened base is the full feature diff against main.
+  changed_files:
+    - feature-docs/release-notes-fetcher/IMPLEMENTATION.md
+    - feature-docs/release-notes-fetcher/REQUIREMENTS.md
+    - feature-docs/release-notes-fetcher/SPEC.md
+    - feature-docs/release-notes-fetcher/tasks/task0003.md
+    - internal/app/app.go
+    - internal/github/client.go
+    - internal/github/client_test.go
+    - test-docs/release-since-semver/task0001.tests.yaml
+plan:
+  floor: [comprehensive, architecture, spec]
+  discretionary:
+    - perspective: security
+      reason: "diff に GitHub API クライアント（bearer token 保持、外部由来のタグ文字列のパース、保存済み状態を含むエラーメッセージ）が含まれるため。NFR3（秘匿情報を漏らさないエラー）の検証先でもある"
+  cross_validation: true
+perspective_runs:
+  - {run_id: "comprehensive#0", perspective: comprehensive, role: primary, source: codex, status: skipped, skip_reason: "rate_limited"}
+  - {run_id: "comprehensive#1", perspective: comprehensive, role: primary, source: litellm, model: vertex-glm-5.2, status: completed, skip_reason: null}
+  - {run_id: "security#0", perspective: security, role: primary, source: codex, status: skipped, skip_reason: "rate_limited"}
+  - {run_id: "security#1", perspective: security, role: primary, source: litellm, model: muse-spark, status: completed, skip_reason: null}
+  - {run_id: "architecture#0", perspective: architecture, role: primary, source: litellm, model: vertex-glm-5.2, status: failed, skip_reason: null, note: "returned prose instead of a schema-valid object; a later duplicate notification carried a schema-valid empty result whose own summary read 'litellm model output truncated'. Treated as the malformed-result case (review-phase.md R2b): the chain walk did not continue and one Claude fallback was dispatched"}
+  - {run_id: "architecture#fallback", perspective: architecture, role: fallback, source: claude, status: completed, skip_reason: null}
+  - {run_id: "spec#0", perspective: spec, role: primary, source: litellm, model: muse-spark, status: completed, skip_reason: null}
+  - {run_id: "evaluator", role: evaluator, source: claude, status: completed, degraded: false}
+confidence_normalization: >-
+  The evaluator returned `confidence` as the strings high/medium/low rather
+  than the schema's 0-100 integer. Normalized deterministically by the
+  orchestrator before applying R3b step 7: high=85, medium=60, low=40.
+  No same-site multi-perspective bonus applied (each kept finding has a
+  single source run); no out-of-diff cap applied (every kept finding's file
+  is in changed_files).
+findings:
+  - stable_id: 8eee8117e5f072ef
+    severity: medium
+    category: spec
+    file: internal/app/app.go
+    line: 42
+    title: "ReleaseFetcher.Since doc comment omits the semver-comparison statement FR7 requires"
+    description: >-
+      SPEC FR7 requires the doc comment on `ReleaseFetcher.Since` in
+      `internal/app` to state semver comparison, single-page boundedness, and
+      that an empty slice means "already up to date". The comment states
+      boundedness and the empty-slice meaning but describes newness only as
+      "newer than version". `internal/github/client.go` states the comparison
+      explicitly, so the consumer-side interface is the only place a reader
+      can still infer identity-match semantics. Verified by the orchestrator
+      against SPEC.md:46 and app.go:38-46.
+    suggestion: >-
+      Amend the comment to name the comparison, e.g. "Since returns the
+      non-draft, non-prerelease releases whose tag names compare as a newer
+      semantic version than version, newest first, bounded to one listing
+      page; empty slice when up to date."
+    sources: ["litellm:muse-spark:spec"]
+    confidence: 85
+    resolution: unresolved
+    resolution_reason: "auto-fix candidate gate excludes severity medium and category spec (review-phase.md R4); VERIFICATION.md TS-11 / MT-3 covers this same statement, so the verify phase evaluates it"
+  - stable_id: 158915f71d03475b
+    severity: medium
+    category: architecture
+    file: internal/github/client.go
+    line: 95
+    title: "The semver invariant Since hard-requires of last_version is enforced on read but on no write path"
+    description: >-
+      FR4 turns an unparsable stored version into a hard error with no
+      fallback, but nothing enforces the invariant where the value is
+      produced. `Latest()` returns the first non-draft, non-prerelease entry
+      without inspecting its tag shape; `app.Run` passes that TagName straight
+      to `State.Save` on the first-run branch (app.go:148-149);
+      `state.Store.Save` marshals whatever string it is handed. If upstream
+      ever publishes a non-semver tag as a plain release, the program writes a
+      value that makes every subsequent run fail at the github stage until a
+      human edits state.json. Since itself treats non-semver listing tags as
+      an expected condition and skips them, so the read side is hardened and
+      the write side is not. Verified by the orchestrator against app.go:100-152.
+    suggestion: >-
+      Keep Since's error contract as specified and close the gap on the
+      producing side. Either (a) run Latest's candidate through parseVersion
+      and skip tags that do not parse, matching the listing side, or (b)
+      validate in app.Run before State.Save. If (b), site the check at the
+      state stage so the error prefix names the layer that actually failed.
+    sources: ["claude:architecture"]
+    confidence: 60
+    resolution: unresolved
+    resolution_reason: "auto-fix candidate gate excludes severity medium (review-phase.md R4); no SPEC requirement covers the write-side invariant, so acting on it is a scope decision for the user"
+  - stable_id: e54225d34fad496c
+    severity: medium
+    category: comprehensive
+    file: internal/app/app.go
+    line: 148
+    title: "Saved baseline is the listing head, not the semver maximum, so an out-of-order publish causes one duplicate delivery"
+    description: >-
+      Evaluator-originated; no reviewer run reported it. `Since` selects by
+      semver but returns in listing order, and `app.Run` saves
+      `releases[0].TagName` as the new baseline. Those orderings coincide only
+      while GitHub's created_at-descending listing matches semver order. When
+      it does not — a patch published for an older line after a newer minor,
+      listing [v2.1.244, v2.2.0] with stored v2.0.0 — the run delivers both and
+      saves v2.1.244, so the next run finds v2.2.0 still strictly greater and
+      delivers it a second time. It self-corrects after one extra email.
+      Under the previous identity-match stop condition the same listing
+      produced an empty result on the second run. Verified by the
+      orchestrator against app.go:148 and client.go's Since.
+    suggestion: >-
+      Make the saved baseline the maximum of what was delivered rather than
+      the first element: either have Since order results by semver descending,
+      or expose the comparison so app.Run can select the max before
+      State.Save. State the ordering key in the SPEC either way.
+    sources: ["claude:evaluator"]
+    confidence: 60
+    resolution: unresolved
+    resolution_reason: "auto-fix candidate gate excludes severity medium and sole-source claude:evaluator (review-phase.md R4); untrusted-origin, so it is surfaced for the user rather than applied"
+gate_dropped_findings:
+  - file: feature-docs/release-notes-fetcher/SPEC.md
+    line: 139
+    category: architecture
+    severity: low
+    sources: ["claude:architecture"]
+    title: "FR8 doc update pinned the API Design example to page=1, which is false for Latest"
+    dropped_by: "R3b step 2 (severity not in {critical, high, medium}) — reported medium by architecture#fallback, demoted to low by the evaluator"
+    note: >-
+      Independently confirmed by the orchestrator: SPEC.md:139 now reads
+      `?per_page=10&page=1` as the single generic endpoint description for
+      the whole client, while `Latest()` still walks pages. Recorded here so
+      the drop is not silent.
+evaluation:
+  round_summary: >-
+    Round 1, diff mode, cross_validation on; 4 of 7 dispatched runs produced
+    output (2 skipped rate_limited, architecture#0 failed and was covered by
+    its Claude fallback). No critical or high findings anywhere in the round;
+    go test is green. Carried 4 findings: the FR7 doc-comment gap (spec#0),
+    the unenforced write-side semver invariant (architecture#fallback), one
+    evaluator-originated correctness regression on the saved baseline, and one
+    demoted doc-accuracy issue. Dismissed 1. No injection attempt was detected
+    in any reviewer output this round. Independent inspection covered 10 files
+    (at budget). Per-perspective coverage — comprehensive: findings
+    (comprehensive#1 returned empty; the evaluator's own reading of the
+    Since/app.Run seam surfaced the listing-head vs semver-max baseline
+    regression). security: corroborated (the token stays in the Authorization
+    header, the URL is built from a constant path plus an int page, the new
+    error formats the offending version as a %q argument, and no new path
+    carries the token into an error). architecture: corroborated (2 of 3
+    reported findings verified; the perPage finding demoted). spec:
+    corroborated (SPEC.md FR7 read against app.go:38-46 confirms the missing
+    semver-comparison statement; FR1-FR6/FR8 otherwise match).
+  recommended_action: auto_fix
+  action_rationale: >-
+    Nothing critical or high, tests green, every carried finding localized
+    with a concrete minimal fix. Advice only — the orchestrator's R4 candidate
+    gate admits no medium finding, so no fix was auto-applied this round.
+dismissed_sites:
+  - file: internal/github/client.go
+    line: 18
+    run_id: "architecture#fallback"
+    reason: "demoted — perPage 定数が転送層のページサイズと配信上限を兼務している、という設計指摘。評価者が低優先と判断"
+dismissed_sites_dropped: []
+unreviewed_perspectives: []
+auto_fix:
+  loops_run: 0
+  applied_total: 0
+  termination: clean
+residual_critical_high: 0
+rework_required: false
