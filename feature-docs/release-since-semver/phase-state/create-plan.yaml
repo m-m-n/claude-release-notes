@@ -1,0 +1,21 @@
+schema_version: 1
+feature: release-since-semver
+phase: create-plan
+status: dispatching
+generation: 1
+base_revision: 869e8abaae416a624df7d58019604807d88402a5
+last_input_digest: sha256:5d37b8b25bcc2f12db9e1eba42807df3d72f9909b2ba267253d92c2db07ef63b
+active_request_id: create-plan-run-0001
+packets: {}
+answers: {}
+worker_runs:
+  - request_id: create-plan-run-0001
+    status: dispatched
+    input_digest: sha256:5d37b8b25bcc2f12db9e1eba42807df3d72f9909b2ba267253d92c2db07ef63b
+    output_digest: null
+artifacts: []
+patches: []
+progress_fingerprint: null
+stale_redispatch_count: 0
+resolved_input_cache: {}
+last_error: null
