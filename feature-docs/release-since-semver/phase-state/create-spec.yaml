@@ -1,136 +1,177 @@
 schema_version: 1
 feature: release-since-semver
 phase: create-spec
-status: completed
-generation: 1
-base_revision: ee43fd79eadf2eb36a98cccfdd1ff9118b681d91
-last_input_digest: sha256:541a76e236aea4165587a989221a1ecc8f66721fa3bafdc7865abf05899ac01f
-active_request_id: null
+status: dispatching
+generation: 2
+base_revision: 6bcac9a55801189d59574d550fb144605c5f3e68
+last_input_digest: sha256:140f9da465cc03480f115e446f82b2b7c9ccea110a529dd9c804b3778ecbd4a6
+active_request_id: create-spec-run-0004
 packets:
   release-since-semver-q0001:
     status: answered
-    issued_at: "2026-09-06T19:49:21+09:00"
+    issued_at: '2026-09-06T19:49:21+09:00'
     questions:
-      - question_id: existing-docs.reconciliation
-        status: answered
-      - question_id: scope.skipped-releases
-        status: answered
-      - question_id: edge-case.corrupt-state-recovery
-        status: answered
-      - question_id: design-step.decision
-        status: answered
+    - question_id: existing-docs.reconciliation
+      status: answered
+    - question_id: scope.skipped-releases
+      status: answered
+    - question_id: edge-case.corrupt-state-recovery
+      status: answered
+    - question_id: design-step.decision
+      status: answered
   release-since-semver-q0002:
     status: answered
-    issued_at: "2026-09-06T20:41:07+09:00"
+    issued_at: '2026-09-06T20:41:07+09:00'
     questions:
-      - question_id: existing-docs.sixteenth-location
-        status: answered
+    - question_id: existing-docs.sixteenth-location
+      status: answered
 answers:
   existing-docs.sixteenth-location:
     packet_id: release-since-semver-q0002
-    answered_at: "2026-09-06T20:41:07+09:00"
+    answered_at: '2026-09-06T20:41:07+09:00'
     source: user
     answer_mode: single_select
-    selected_option_ids: [fold_into_task0001]
+    selected_option_ids:
+    - fold_into_task0001
     freeform: null
     normalized_answer: null
   design-step.decision:
     packet_id: release-since-semver-q0001
-    answered_at: "2026-09-06T19:49:21+09:00"
+    answered_at: '2026-09-06T19:49:21+09:00'
     source: user
     answer_mode: single_select
-    selected_option_ids: [skip]
+    selected_option_ids:
+    - skip
     freeform: null
     normalized_answer: null
   edge-case.corrupt-state-recovery:
     packet_id: release-since-semver-q0001
-    answered_at: "2026-09-06T19:49:21+09:00"
+    answered_at: '2026-09-06T19:49:21+09:00'
     source: user
     answer_mode: single_select
-    selected_option_ids: [document_recovery]
+    selected_option_ids:
+    - document_recovery
     freeform: null
     normalized_answer: null
   existing-docs.reconciliation:
     packet_id: release-since-semver-q0001
-    answered_at: "2026-09-06T19:49:21+09:00"
+    answered_at: '2026-09-06T19:49:21+09:00'
     source: user
     answer_mode: single_select
-    selected_option_ids: [update_stale_parts]
+    selected_option_ids:
+    - update_stale_parts
     freeform: null
     normalized_answer: null
   scope.skipped-releases:
     packet_id: release-since-semver-q0001
-    answered_at: "2026-09-06T19:49:21+09:00"
+    answered_at: '2026-09-06T19:49:21+09:00'
     source: user
     answer_mode: select_or_freeform
-    selected_option_ids: [accept_permanently]
+    selected_option_ids:
+    - accept_permanently
     freeform: null
     normalized_answer: null
 worker_runs:
-  - request_id: create-spec-run-0001
-    status: needs_user_input
-    input_digest: sha256:7de24d864c6fea8ae1ab49143cb343e0bfda01778ae0d3718de3506f19e25f65
-    output_digest: null
-  - request_id: create-spec-run-0002
-    status: completed
-    input_digest: sha256:c14ae32969f365388150fbcae4438da29b670ef4ab0eec4475ffdf531e6fbf6a
-    output_digest: sha256:38753ed05882682e825da5b17a187a88bb55970ea13c53e0c45cbae7f30d56cd
-  - request_id: create-spec-run-0003
-    status: completed
-    input_digest: sha256:541a76e236aea4165587a989221a1ecc8f66721fa3bafdc7865abf05899ac01f
-    output_digest: sha256:ab308a7d0222584a62646e7fcdb2b5f39b7a5e8b03de2fd08961f442541ae9cc
+- request_id: create-spec-run-0001
+  status: needs_user_input
+  input_digest: sha256:7de24d864c6fea8ae1ab49143cb343e0bfda01778ae0d3718de3506f19e25f65
+  output_digest: null
+- request_id: create-spec-run-0002
+  status: completed
+  input_digest: sha256:c14ae32969f365388150fbcae4438da29b670ef4ab0eec4475ffdf531e6fbf6a
+  output_digest: sha256:38753ed05882682e825da5b17a187a88bb55970ea13c53e0c45cbae7f30d56cd
+- request_id: create-spec-run-0003
+  status: completed
+  input_digest: sha256:541a76e236aea4165587a989221a1ecc8f66721fa3bafdc7865abf05899ac01f
+  output_digest: sha256:ab308a7d0222584a62646e7fcdb2b5f39b7a5e8b03de2fd08961f442541ae9cc
+- request_id: create-spec-run-0004
+  status: dispatching
+  input_digest: sha256:140f9da465cc03480f115e446f82b2b7c9ccea110a529dd9c804b3778ecbd4a6
+  output_digest: null
 artifacts:
-  - path: feature-docs/release-since-semver/REQUIREMENTS.md
-    sha256: sha256:98381c93e59d22919d1b12f1e173374f3205d18e04cf15335e84010135859748
-    produced_by: create-spec-run-0003
-  - path: feature-docs/release-since-semver/SPEC.md
-    sha256: sha256:98aa0d6409800116f0965f6d1944c8b6963d29cbf65baf937e8210e68f7d590b
-    produced_by: create-spec-run-0003
+- path: feature-docs/release-since-semver/REQUIREMENTS.md
+  sha256: sha256:98381c93e59d22919d1b12f1e173374f3205d18e04cf15335e84010135859748
+  produced_by: create-spec-run-0003
+- path: feature-docs/release-since-semver/SPEC.md
+  sha256: sha256:98aa0d6409800116f0965f6d1944c8b6963d29cbf65baf937e8210e68f7d590b
+  produced_by: create-spec-run-0003
 patches: []
 progress_fingerprint: sha256:a028dd34ffb1d61d7f9792f2a27b13ca8823bcd792717cbef425c81afc852a26
 stale_redispatch_count: 0
 resolved_input_cache:
   design_system_candidates:
-    generation_digest: sha256:6b164c7ecfe2b4c0507274e66e38a0d6f7ecd5b1b4e31a0cd5589117d840671a
-    resolved_at_generation: 1
+    generation_digest: sha256:140f9da465cc03480f115e446f82b2b7c9ccea110a529dd9c804b3778ecbd4a6
+    resolved_at_generation: 2
     paths:
-      - design-system/tokens.yaml
+    - design-system/tokens.yaml
+    - design-system/tokens.html
     digests:
       design-system/tokens.yaml: sha256:aa164a9701cf3dbcc1b4a6edb340315f8d81f6148fc5a67fa331739d1b207538
+      design-system/tokens.html: sha256:9d8011792c687aed016e129cb7c70260891cab30364cc125b2c615a10558d007
     truncated: false
   reference_scan_targets:
-    generation_digest: sha256:46c5e6e08508e09477dd3836b683307a8524f0b40e6192513ad856dc25c37607
-    resolved_at_generation: 1
+    generation_digest: sha256:140f9da465cc03480f115e446f82b2b7c9ccea110a529dd9c804b3778ecbd4a6
+    resolved_at_generation: 2
     paths:
-      - internal/github/client.go
-      - internal/github/client_test.go
-      - internal/app/app.go
-      - feature-docs/release-notes-fetcher/SPEC.md
-      - feature-docs/release-notes-fetcher/REQUIREMENTS.md
-      - feature-docs/release-notes-fetcher/tasks/task0003.md
+    - internal/github/client.go
+    - internal/github/client_test.go
+    - internal/app/app.go
+    - internal/app/app_test.go
+    - internal/state/state.go
+    - internal/state/state_test.go
+    - feature-docs/release-notes-fetcher/SPEC.md
+    - feature-docs/release-notes-fetcher/REQUIREMENTS.md
+    - feature-docs/release-notes-fetcher/IMPLEMENTATION.md
+    - feature-docs/release-notes-fetcher/tasks/task0003.md
     digests:
       internal/github/client.go: sha256:4f0a459fbeca4eb2af4f01435b937d4add2e1bd058247ce8276f89c4a1b49d6f
       internal/github/client_test.go: sha256:207a763796160871ef5bc4ee29ffc4ccd7cbddc2d05d6f3d79432874a5962a60
       internal/app/app.go: sha256:6278bfcf7d3f58cf957ed5df6193afe87964e0aa828d103707fc0c0f38f877e7
-      feature-docs/release-notes-fetcher/SPEC.md: sha256:f7e1e6b3bcd077e2e874a3447f011294e8bbd5e51f94203f7767a9b45542b45b
-      feature-docs/release-notes-fetcher/REQUIREMENTS.md: sha256:dfae108a7524ce24448932c4225033de52cbc7b4e05cd1a1c53bad34709de494
-      feature-docs/release-notes-fetcher/tasks/task0003.md: sha256:8147fbd53f80e9fd0d209f5c01f1ddf701c2403d69dd72528aaaf0d3aa54d1f8
+      internal/app/app_test.go: sha256:9ae24ca1a67b99152678d165b9720cfc20c2ccd9525ae3dd983f495dbdc85360
+      internal/state/state.go: sha256:e14fc481146f61c586f1274e376e2597c0d1d4267fa6f55d3242f43c13390af6
+      internal/state/state_test.go: sha256:ef70bd5a683b6672a485de44d296f0f8efa025b25d6bf765b20e5f3e11bbb9a5
+      feature-docs/release-notes-fetcher/SPEC.md: sha256:f10372165c59db790dd47eda92398deed22d3ecaf0bb7a60f242e77ba8ab4505
+      feature-docs/release-notes-fetcher/REQUIREMENTS.md: sha256:9d13393a81f583a427aa5400023c7f5408ea40d697340e33f3ac9d90190444aa
+      feature-docs/release-notes-fetcher/IMPLEMENTATION.md: sha256:e93a45cf1c1ca31c72a96fbeeeaf891efbc3ea5ac608d165ffb9045d3961dc88
+      feature-docs/release-notes-fetcher/tasks/task0003.md: sha256:8fd848b94cbf8793a19028807fe769083f0be0970650e9802a0d210cb11aee87
     truncated: false
-last_error: >-
-  Deviation recorded, not a failure. The reference-impact scan enumerated
-  fifteen stale locations and FR8 was written against that number. While the
-  create-plan artifacts were being reviewed, a sixteenth stale location was
-  identified: the github.Client row of the Shared Components table in
-  feature-docs/release-notes-fetcher/IMPLEMENTATION.md, whose Since(version)
-  post-condition still reads "following pagination". The planner had raised it
-  as the first Open Question in IMPLEMENTATION.md. The user was asked and chose
-  to fold it into this feature rather than defer it
-  (existing-docs.sixteenth-location -> fold_into_task0001).
-  The orchestrator therefore edited SPEC.md (FR8 body and TS-9) and
-  REQUIREMENTS.md (seven "15 箇所" sites) in place, without re-entering
-  create-spec through the create-spec: needs_update path and without
-  re-dispatching spec-writer. The edits are confined to the count and the
-  target enumeration; no requirement was added, removed or restated. The
-  artifact digests above were recomputed after the edits. create-plan's
-  IMPLEMENTATION.md, VERIFICATION.md and tasks/task0001.md were updated in the
-  same pass and are recorded in create-plan.yaml.
+  e2e:
+    generation_digest: sha256:140f9da465cc03480f115e446f82b2b7c9ccea110a529dd9c804b3778ecbd4a6
+    resolved_at_generation: 2
+    paths:
+    - test/README.md
+    digests:
+      test/README.md: sha256:af07cab73c1746b2726e867a4de4808e4d72e7d6d21d4fcd994478047bc2ae31
+    truncated: false
+last_error: 'Deviation recorded, not a failure. The reference-impact scan enumerated fifteen stale locations
+  and FR8 was written against that number. While the create-plan artifacts were being reviewed, a sixteenth
+  stale location was identified: the github.Client row of the Shared Components table in feature-docs/release-notes-fetcher/IMPLEMENTATION.md,
+  whose Since(version) post-condition still reads "following pagination". The planner had raised it as
+  the first Open Question in IMPLEMENTATION.md. The user was asked and chose to fold it into this feature
+  rather than defer it (existing-docs.sixteenth-location -> fold_into_task0001). The orchestrator therefore
+  edited SPEC.md (FR8 body and TS-9) and REQUIREMENTS.md (seven "15 箇所" sites) in place, without re-entering
+  create-spec through the create-spec: needs_update path and without re-dispatching spec-writer. The edits
+  are confined to the count and the target enumeration; no requirement was added, removed or restated.
+  The artifact digests above were recomputed after the edits. create-plan''s IMPLEMENTATION.md, VERIFICATION.md
+  and tasks/task0001.md were updated in the same pass and are recorded in create-plan.yaml.
+
+
+  Second record, generation 2. create-spec was re-entered with status:
+
+  needs_update by the specification-change transition (phase-state/rework.yaml).
+
+  This is a partial update per create-spec-phase.md Section 11: tasks, each
+
+  step''s status beyond what the transition assigned, implement.base_commit,
+
+  project and goal are left untouched; only the create-spec artifacts and the
+
+  requirements upsert are written. generation was incremented to 2 and the
+
+  resolved_input_cache re-resolved accordingly, with internal/state and
+
+  internal/app test files added to reference_scan_targets because the two
+
+  user decisions reach those layers.
+
+  '
