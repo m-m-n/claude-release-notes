@@ -83,5 +83,5 @@ spec_change:
   origin_id: e54225d34fad496c
   recorded_at_commit: ee0905d0d0b6db6efebca3a442cb23f95cfdeaaf
   consumed: true
-  replan_authorized: true
+  replan_authorized: false
 classification: []

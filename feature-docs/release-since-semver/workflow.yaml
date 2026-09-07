@@ -87,8 +87,8 @@ workflow:
     skipped_reason: "変更範囲が internal/github の比較ロジックと internal/app の doc コメント、および旧 feature-docs の記述更新に限られる。メール HTML ビルダ（internal/mail）にも design-system/tokens.yaml の消費先にも触れないため、視覚設計の判断が発生しない"
   - id: create-plan
     artifacts: [IMPLEMENTATION.md, VERIFICATION.md, tasks/]
-    status: pending
-    completed_at_commit: null
+    status: completed
+    completed_at_commit: 4f26df5395c6940a17ca5fb0fac3f15c28643c38
   - id: implement
     status: pending
     base_commit: 97e11f7b0acecfe45988bede93ff859ea6c23a70
@@ -119,6 +119,36 @@ tasks:
     status: merged
     notes: null
     branch: em-workflow/release-since-semver/task0001
+  task0002:
+    title: Semver-greatest persisted baseline and parseable-only latest selection
+    plan: tasks/task0002.md
+    files:
+      - internal/github/client.go
+      - internal/github/client_test.go
+      - internal/app/app.go
+      - internal/app/app_test.go
+    skills: [backend-impl]
+    domains: [api-contract, data-persistence, external-io, input-handling]
+    complexity: medium
+    requirements: [FR7, FR9, FR10, NFR4]
+    status: pending
+    notes: null
+    branch: null
+  task0003:
+    title: Align legacy docs with the semver-greatest baseline and parseable-only latest selection
+    plan: tasks/task0003.md
+    files:
+      - feature-docs/release-notes-fetcher/SPEC.md
+      - feature-docs/release-notes-fetcher/REQUIREMENTS.md
+      - feature-docs/release-notes-fetcher/IMPLEMENTATION.md
+      - feature-docs/release-notes-fetcher/tasks/task0003.md
+    skills: []
+    domains: [api-contract]
+    complexity: low
+    requirements: [FR11]
+    status: pending
+    notes: null
+    branch: null
 
 review:
   status: pending
@@ -185,7 +215,7 @@ requirements:
     status: ok
     tbd_reason: null
     excluded_reason: null
-    tasks: []
+    tasks: [task0002]
     tests: [TS-11]
   FR8:
     title: "Update the older feature-docs/release-notes-fetcher/ documents"
@@ -199,22 +229,22 @@ requirements:
     status: ok
     tbd_reason: null
     excluded_reason: null
-    tasks: []
-    tests: []
+    tasks: [task0002]
+    tests: [TS-13]
   FR10:
     title: "Unparseable tags are excluded from latest-release selection"
     status: ok
     tbd_reason: null
     excluded_reason: null
-    tasks: []
-    tests: []
+    tasks: [task0002]
+    tests: [TS-14]
   FR11:
     title: "Update the older feature-docs/ statements that FR9 and FR10 make stale"
     status: ok
     tbd_reason: null
     excluded_reason: null
-    tasks: []
-    tests: []
+    tasks: [task0003]
+    tests: [TS-15]
   NFR1:
     title: "Dependency boundary"
     status: ok
@@ -241,5 +271,5 @@ requirements:
     status: ok
     tbd_reason: null
     excluded_reason: null
-    tasks: []
-    tests: []
+    tasks: [task0002]
+    tests: [TS-16]
