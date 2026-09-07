@@ -1,0 +1,56 @@
+feature: release-since-semver
+collected_at: "2026-09-07T09:55:00+09:00"
+session_ids: [f0fcd19f-7a0a-435a-9efb-ae8dd3332ccf.jsonl]
+signals:
+  review_critical_high: []
+  conflict_reworks: []
+  file_prediction_misses: []
+  verification_failures: []
+  discretionary_perspectives:
+    - perspective: security
+      reason: >-
+        Round 1 only. The diff carried a GitHub API client (bearer token held,
+        externally-sourced tag strings parsed, error messages containing the
+        stored state), and NFR3 needed a verification site. In round 2 the same
+        perspective arrived through the mechanical floor instead, because
+        task0002 registered domains data-persistence, external-io and
+        input-handling — the rule table selected it without discretion.
+  declined_findings: []
+follow_up_drafts: []
+lessons_candidates:
+  - note: >-
+      The mechanical floor is only as wide as the registered task domains. In
+      round 1 the sole task (task0001) was a documentation task with domains
+      [api-contract], so the floor was comprehensive/architecture/spec and both
+      security and performance had to be added by discretion or not at all. The
+      code the round actually reviewed had been written before the feature
+      started and carried no task metadata of its own. A feature that reviews
+      pre-existing code has no task metadata describing that code.
+  - note: >-
+      vertex-glm-5.2 produced a degenerate placeholder object twice across the
+      two rounds — round 1 on architecture (prose instead of JSON), round 2 on
+      comprehensive ({"skip_reason":"temp placeholder","summary":"temp"}). Both
+      times the orchestrator recorded status: failed and fell back to Claude,
+      and both times the fallback produced substantive findings. The model is
+      listed as Preview in the harness SSOT.
+  - note: >-
+      Codex hit its usage limit for both of its front-of-chain entries in round
+      2 within seconds of each other. The chain walk absorbed it (both
+      perspectives advanced to LiteLLM and one completed there), so the
+      registry's decision to put a non-codex entry behind every codex entry paid
+      off exactly as its comment predicted.
+  - note: >-
+      Two review rounds each surfaced the same class of defect: a consumer-side
+      doc comment on ReleaseFetcher left stale when the concrete implementation
+      changed. Round 1 caught it on Since (8eee8117e5f072ef), round 2 on Latest
+      (aa497af6025a4610), and the round-2 instance was introduced by the very
+      task that fixed the round-1 one. The interface and its implementation live
+      in different packages, so nothing mechanical ties them together.
+  - note: >-
+      The FR9 change moved the persisted baseline to the semver maximum but left
+      the mail pipeline on listing order, so "newest" now means two different
+      things in one run. VERIFICATION.md has no scenario covering the mail
+      subject or body order, so verify passes while review finding
+      346813f438c55aff stands unresolved. A verification plan derived only from
+      the feature's own requirements does not see a contract it shares with a
+      neighbouring component.

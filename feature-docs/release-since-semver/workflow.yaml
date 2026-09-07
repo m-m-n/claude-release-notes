@@ -119,7 +119,7 @@ workflow:
       legacy SPEC.md:28's "newest version first", which review round 2
       recorded as finding 346813f438c55aff.
   - id: retrospect
-    status: pending
+    status: completed
 
 tasks:
   task0001:
