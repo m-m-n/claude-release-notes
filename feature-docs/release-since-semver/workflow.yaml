@@ -97,9 +97,27 @@ workflow:
     status: completed
     completed_at_commit: 4250baa5215a91c731cb2172d3dabe2cc8af780f
   - id: verify
-    status: in_progress
-    result: null
+    status: completed
+    result: pass
     failed_items: []
+    notes: >-
+      go build ./... , go test ./... (every package ok), gofmt -w . (working
+      tree unchanged) and go vet ./... all passed in the integration worktree.
+      TS-1..TS-8, TS-10, TS-13, TS-14 and TS-16's table half are carried by
+      named tests that ran green. TS-9 (MT-1/MT-2), TS-11 (MT-3), TS-12,
+      TS-15 (MT-7/MT-8) and TS-16's textual half (MT-9) were checked textually
+      and pass: no FR8 stale marker survives task0003's edits, the FR11
+      locations L1-L20 convey CB9/CB10, internal/app holds no version parsing
+      or comparison of its own and reaches the rule through exactly one
+      MaxByVersion call site, and internal/github exports only Release,
+      Client, NewClient, Latest, Since and MaxByVersion. MT-4 holds (the
+      latest-release pagination statements survive; only the two D8
+      supersessions changed) and MT-5 holds (the observed change set is
+      contained in the declared one). MT-6 reports, without fixing: legacy
+      REQUIREMENTS.md 2.3's 「漏れなく」/「見逃し防止」 and UC01 step 1's
+      「取得済み最新バージョンを読む」 are outside both enumerations, as is
+      legacy SPEC.md:28's "newest version first", which review round 2
+      recorded as finding 346813f438c55aff.
   - id: retrospect
     status: pending
 
