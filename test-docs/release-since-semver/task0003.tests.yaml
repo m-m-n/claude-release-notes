@@ -1,0 +1,98 @@
+task_id: task0003
+baseline_failures: []          # go test ./... was all-green before any edit (docs-only task; no Go files touched)
+final_failures: []
+acceptance_tests:
+  AC-1:
+    tests: []
+    red_confirmed: true
+    red_reason: >-
+      No test harness exists for prose (IMPLEMENTATION.md D3); verified by
+      textual grep + read instead. Pre-edit, SPEC.md contained all five stale
+      statements the location table names: "Persist the last delivered
+      release `tag_name`" and "process only the latest release" (L1/L2),
+      "exactly the latest release is fetched" (L3),
+      "state.Write(newestVersion)" (L4), and "yields only the latest
+      release" (L5, TS-2). Post-edit grep for each exact stale phrase across
+      the file returns no hits, and a manual read of all five locations
+      against the table confirms the canonical statements (CB9/CB10) are
+      present with surrounding structure unchanged.
+  AC-2:
+    tests: []
+    red_confirmed: true
+    red_reason: >-
+      Same textual method. Pre-edit, REQUIREMENTS.md contained the nine
+      stale Japanese statements the table names, e.g. "状態ファイルを最新
+      バージョンに更新する" (L6), "取得済み最新リリースの tag_name" (L12/L14),
+      "最新の 1 リリースのみを取得する" (L8), "初回実行で最新 1 件のみ取得"
+      (L13). Post-edit grep for "取得済み最新リリース" and for
+      "最新の 1 リリース" / "最新 1 件" (without the parseability/draft/
+      prerelease qualification now inserted before it) returns no hits; all
+      nine locations read against the table confirm CB9/CB10 with section
+      numbering, table structure and IDs unchanged.
+  AC-3:
+    tests: []
+    red_confirmed: true
+    red_reason: >-
+      Pre-edit, IMPLEMENTATION.md's release-client contract cell stated
+      "the newest non-draft, non-prerelease release" (no parseability
+      filter) and the state-store Responsibility cell stated "Persist last
+      delivered version" (no semver-greatest qualification). Post-edit `git
+      diff` shows exactly two lines changed in this file (the two named
+      cells), and the rest of the Shared Components table, the differential
+      half of the same contract cell, the other rows, and every task
+      attribution are byte-identical (confirmed by reading the diff hunk,
+      which touches only those two lines).
+  AC-4:
+    tests: []
+    red_confirmed: true
+    red_reason: >-
+      Pre-edit, feature-docs/release-notes-fetcher/tasks/task0003.md's Goal
+      described the second query without the first-listing-page bound
+      restated, Design item 3 lacked the parseability exclusion for
+      Latest(), Design item 4 selected on "first non-draft, non-prerelease
+      entry" without a parseability filter, and AC-5 said "returns the
+      newest filtered release" without naming the filter. Post-edit grep for
+      each stale phrase returns no hits; all four locations read against the
+      table confirm CB10 (and CB7 for the pagination half of item 4) with
+      design-item numbering and acceptance-criterion numbering unchanged.
+  AC-5:
+    tests: []
+    red_confirmed: true
+    red_reason: >-
+      Mechanical grep-based check, run before and after per the task plan's
+      Test Notes (prose has no red-green cycle, so this substitutes for
+      one). Pre-edit: grep across the four files for the stale-marker set
+      matched at every one of the 20 target locations (see AC-1..AC-4
+      reasons for the exact strings matched). Post-edit: the same grep
+      returns zero matches for every marker, with two exceptions —
+      REQUIREMENTS.md line "状態ファイルから取得済み最新バージョンを読む"
+      (UC01 step 1) and "状態ファイルを作成し最新バージョンを記録する" (UC02
+      step 4) — both explicitly named in the task plan's Boundary section as
+      not targets (UC02 step 4 is called out by name; UC01 step 1 is simply
+      outside the enumerated L1-L20 set and describes reading an already-
+      resolved value, not asserting a selection rule).
+  AC-6:
+    tests: []
+    red_confirmed: false
+    red_reason: >-
+      Negative/scope constraint (no location is rewritten twice), not an
+      observable behavior with a red state. Verified by reviewing `git diff`
+      hunks: none of the 20 changed lines coincides with any of task0001's
+      sixteen locations (cross-checked by content, since this worktree does
+      not carry task0001's own task-plan file), and the only two of
+      task0001's byte-identical boundaries touched are exactly the two
+      IMPLEMENTATION.md D8 names as superseded (the release-client
+      latest-release cell, and tasks/task0003.md Design item 4's selection
+      clause) — its pagination clause and reverse-chronological note in the
+      same item are untouched.
+  AC-7:
+    tests: []
+    red_confirmed: false
+    red_reason: >-
+      Negative/scope constraint on the change set, not an observable
+      behavior with a red state. Verified by `git status`/`git diff
+      --name-only`: working tree was clean before any edit, and the final
+      diff touches exactly the four files listed under Scope
+      (feature-docs/release-notes-fetcher/{SPEC.md,REQUIREMENTS.md,
+      IMPLEMENTATION.md,tasks/task0003.md}); nothing under reviews/,
+      phase-state/, internal/, cmd/, or test/ appears in the diff.
