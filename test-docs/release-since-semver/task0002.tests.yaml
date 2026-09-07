@@ -1,0 +1,78 @@
+task_id: task0002
+baseline_failures: []
+final_failures: []
+acceptance_tests:
+  AC-1:
+    tests:
+      - claude-release-notes/internal/github TestMaxByVersion/maximum_at_head
+      - claude-release-notes/internal/github TestMaxByVersion/maximum_at_tail
+      - claude-release-notes/internal/github TestMaxByVersion/single_element
+      - "claude-release-notes/internal/github TestMaxByVersion/equal_versions_-_earlier_input_wins"
+      - claude-release-notes/internal/github TestMaxByVersion/unparsable_tag_is_ignored
+      - claude-release-notes/internal/github TestMaxByVersion/empty_input_reports_nothing_found
+      - claude-release-notes/internal/github TestMaxByVersion/all-unparsable_input_reports_nothing_found
+    red_confirmed: true
+    red_reason: "compile error before MaxByVersion existed: internal/github/client_test.go:405:15: undefined: MaxByVersion"
+  AC-2:
+    tests:
+      - claude-release-notes/internal/github TestLatest_SkipsUnparsableTagAtHead
+      - claude-release-notes/internal/github TestLatest_NoParseableCandidateIsError
+    red_confirmed: true
+    red_reason: "TestLatest_SkipsUnparsableTagAtHead: Latest().TagName = \"nightly\", want \"v3.0.0\"; TestLatest_NoParseableCandidateIsError: Latest() = nil error, want error when no non-draft, non-prerelease, parseable-tag release exists"
+  AC-3:
+    tests:
+      - claude-release-notes/internal/app TestRun_PersistsSemverMaximumOfDeliveredSet
+    red_confirmed: true
+    red_reason: "saved version = \"v2.1.244\" (called=true), want \"v2.2.0\" -- pipeline was still saving releases[0].TagName"
+  AC-4:
+    tests:
+      - claude-release-notes/internal/app TestRun_NoNewReleases_SkipsDownstreamStages
+      - claude-release-notes/internal/app TestRun_StageFailures_WrapWithStagePrefixAndSkipSave/send_failure
+    red_confirmed: false
+    red_reason: >-
+      This behaviour (nothing persisted when nothing was delivered, and
+      nothing persisted when send fails) was already implemented and already
+      covered by these two pre-existing tests (from task0006 of the
+      release-notes-fetcher feature) before this task began; the task plan's
+      own Design section confirms it as "unchanged" scope ("the pipeline
+      already returns early on an empty set"). No production change was
+      needed or made for AC-4; the pre-existing tests already pass and
+      continue to pass unmodified.
+  AC-5:
+    tests: []
+    red_confirmed: false
+    red_reason: >-
+      Textual check per IMPLEMENTATION.md D9, not a Go test. Verified by:
+      (1) grep for digit-splitting/dot-splitting/comparison identifiers
+      (strconv.Atoi, major/minor/patch, isNewer, parseVersion) in
+      internal/app/*.go -> no hits (the only strings.Split hits split log
+      lines on "\n", unrelated to version parsing); (2) grep for
+      "MaxByVersion" call sites in internal/app -> exactly one, in
+      app.go's Run(); (3) grep for exported identifiers
+      (^func [A-Z]|^type [A-Z]) in internal/github/client.go -> Release,
+      Client, NewClient, MaxByVersion only; version/parseVersion/isNewer
+      remain lowercase-initial and unmodified.
+  AC-6:
+    tests: []
+    red_confirmed: false
+    red_reason: >-
+      Prose read-through per the task plan ("TDD-awkward: AC-6 is prose and
+      has no red-green cycle"). The ReleaseFetcher.Since doc comment in
+      internal/app/app.go was missing the semver-comparison statement before
+      this task (it stated only single-page boundedness and the
+      up-to-date-on-empty meaning); it now reads "newer decided by
+      semantic-version comparison of tag names ... bounded to one listing
+      page; empty slice when up to date", carrying all three required
+      statements. Only the missing clause was inserted; the rest of the
+      comment is untouched.
+  AC-7:
+    tests: []
+    red_confirmed: false
+    red_reason: >-
+      Verified by running the project commands directly rather than via a
+      Go test: `go build ./...`, `go test ./...`, `gofmt -w .` (no files
+      changed beyond the four this task edited), and `go vet ./...` all
+      pass with a clean working tree afterward; `git diff --stat -- go.mod
+      go.sum` is empty, confirming the require block is untouched (NFR1).
+      TestGoMod_RequiresOnlyYAMLThirdPartyModule (pre-existing, unmodified)
+      also continues to pass.

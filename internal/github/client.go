@@ -60,8 +60,9 @@ type apiRelease struct {
 	Prerelease  bool      `json:"prerelease"`
 }
 
-// Latest returns the newest non-draft, non-prerelease release. It returns an
-// error if pagination is exhausted without finding one.
+// Latest returns the newest non-draft, non-prerelease release whose tag name
+// parses as vMAJOR.MINOR.PATCH. It returns an error if pagination is
+// exhausted without finding one.
 func (c *Client) Latest() (Release, error) {
 	page := 1
 	for {
@@ -74,6 +75,9 @@ func (c *Client) Latest() (Release, error) {
 		}
 		for _, r := range releases {
 			if r.Draft || r.Prerelease {
+				continue
+			}
+			if _, ok := parseVersion(r.TagName); !ok {
 				continue
 			}
 			return toRelease(r), nil
@@ -116,6 +120,33 @@ func (c *Client) Since(version string) ([]Release, error) {
 		}
 	}
 	return result, nil
+}
+
+// MaxByVersion returns the release among releases whose tag name is the
+// greatest parsed version, together with true. Releases whose tag does not
+// parse as vMAJOR.MINOR.PATCH are ignored. On equal parsed versions the
+// earliest such input wins, making the result deterministic for a listing
+// that repeats a version. MaxByVersion performs no I/O and does not modify
+// or reorder releases; an empty input, or one in which no tag parses,
+// returns the zero Release value and false.
+func MaxByVersion(releases []Release) (Release, bool) {
+	var (
+		best  Release
+		bestV version
+		found bool
+	)
+	for _, r := range releases {
+		v, ok := parseVersion(r.TagName)
+		if !ok {
+			continue
+		}
+		if !found || isNewer(v, bestV) {
+			best = r
+			bestV = v
+			found = true
+		}
+	}
+	return best, found
 }
 
 // version is a parsed vMAJOR.MINOR.PATCH tag name.

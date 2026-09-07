@@ -380,6 +380,43 @@ func TestRun_LogsProgressToStdoutAndErrorsToStderrWithTimezone(t *testing.T) {
 	}
 }
 
+// TestRun_PersistsSemverMaximumOfDeliveredSet references AC-3 (task0002):
+// when the differential query's result is not headed by its semver maximum
+// - the specification's example of v2.1.244 and v2.2.0, in that listing
+// order - the state store receives the v2.2.0 tag name, never the head, and
+// the items handed to the mail builder stay in the order the query
+// returned.
+func TestRun_PersistsSemverMaximumOfDeliveredSet(t *testing.T) {
+	cfg := config.Config{GmailAccount: "a@example.com", GmailAppPassword: "pw", MailTo: "to@example.com", GitHubToken: "tok"}
+	state := &mockStateStore{found: true, version: "v2.0.0"}
+	tOld := mustTime(t, "2026-02-01T00:00:00Z")
+	tNew := mustTime(t, "2026-03-01T00:00:00Z")
+	releases := []github.Release{
+		{TagName: "v2.1.244", Body: "body-2.1.244", PublishedAt: tOld},
+		{TagName: "v2.2.0", Body: "body-2.2.0", PublishedAt: tNew},
+	}
+	fetcher := &mockFetcher{since: releases}
+	translator := &mockTranslator{out: []string{"訳-2.1.244", "訳-2.2.0"}}
+	sender := &mockSender{}
+	stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
+
+	deps, buildCalled, buildItems := newTestDeps(cfg, state, fetcher, translator, sender, stdout, stderr)
+
+	if err := Run(deps); err != nil {
+		t.Fatalf("Run() error = %v, want nil", err)
+	}
+	if !state.saveCalled || state.savedVersion != "v2.2.0" {
+		t.Errorf("saved version = %q (called=%v), want %q", state.savedVersion, state.saveCalled, "v2.2.0")
+	}
+	if !*buildCalled {
+		t.Fatal("Build was not called")
+	}
+	items := *buildItems
+	if len(items) != 2 || items[0].Version != "v2.1.244" || items[1].Version != "v2.2.0" {
+		t.Errorf("build items = %v, want listing order [v2.1.244, v2.2.0] unchanged", items)
+	}
+}
+
 // AC-7: go.mod requires no third-party module other than the YAML parser
 // (NFR1), inspected directly from the worktree's module file.
 func TestGoMod_RequiresOnlyYAMLThirdPartyModule(t *testing.T) {
