@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -322,6 +323,152 @@ func TestLatest_NoNonFilteredReleaseIsError(t *testing.T) {
 	_, err := client.Latest()
 	if err == nil {
 		t.Fatal("Latest() = nil error, want error when no non-draft/non-prerelease release exists")
+	}
+}
+
+// TestMaxByVersion references AC-1 (task0002): MaxByVersion selects the
+// release whose tag name is the greatest parsed version among the inputs
+// that parse, resolves ties to the earliest such input, ignores tags that do
+// not parse, and reports false on an empty or all-unparsable input. It must
+// not reorder or mutate the slice it is given.
+func TestMaxByVersion(t *testing.T) {
+	tests := []struct {
+		name     string
+		releases []Release
+		wantTag  string
+		wantBody string // checked only when non-empty, to distinguish ties by identity
+		wantOK   bool
+	}{
+		{
+			name: "maximum at head",
+			releases: []Release{
+				{TagName: "v3.0.0"},
+				{TagName: "v1.0.0"},
+				{TagName: "v2.0.0"},
+			},
+			wantTag: "v3.0.0",
+			wantOK:  true,
+		},
+		{
+			name: "maximum at tail",
+			releases: []Release{
+				{TagName: "v1.0.0"},
+				{TagName: "v2.0.0"},
+				{TagName: "v3.0.0"},
+			},
+			wantTag: "v3.0.0",
+			wantOK:  true,
+		},
+		{
+			name:     "single element",
+			releases: []Release{{TagName: "v1.2.3"}},
+			wantTag:  "v1.2.3",
+			wantOK:   true,
+		},
+		{
+			name: "equal versions - earlier input wins",
+			releases: []Release{
+				{TagName: "v2.0.0", Body: "earlier"},
+				{TagName: "v2.0.0", Body: "later"},
+			},
+			wantTag:  "v2.0.0",
+			wantBody: "earlier",
+			wantOK:   true,
+		},
+		{
+			name: "unparsable tag is ignored",
+			releases: []Release{
+				{TagName: "nightly"},
+				{TagName: "v1.0.0"},
+			},
+			wantTag: "v1.0.0",
+			wantOK:  true,
+		},
+		{
+			name:     "empty input reports nothing found",
+			releases: nil,
+			wantOK:   false,
+		},
+		{
+			name: "all-unparsable input reports nothing found",
+			releases: []Release{
+				{TagName: "nightly"},
+				{TagName: "v1.2"},
+			},
+			wantOK: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			original := append([]Release(nil), tt.releases...)
+
+			got, ok := MaxByVersion(tt.releases)
+
+			if ok != tt.wantOK {
+				t.Fatalf("MaxByVersion() ok = %v, want %v", ok, tt.wantOK)
+			}
+			if ok && got.TagName != tt.wantTag {
+				t.Errorf("MaxByVersion().TagName = %q, want %q", got.TagName, tt.wantTag)
+			}
+			if ok && tt.wantBody != "" && got.Body != tt.wantBody {
+				t.Errorf("MaxByVersion().Body = %q, want %q (tie should resolve to earliest input)", got.Body, tt.wantBody)
+			}
+			if !ok && got != (Release{}) {
+				t.Errorf("MaxByVersion() = %+v on not-found, want zero value", got)
+			}
+			if !reflect.DeepEqual(tt.releases, original) {
+				t.Errorf("MaxByVersion reordered or mutated its input: got %v, want %v", tt.releases, original)
+			}
+		})
+	}
+}
+
+// TestLatest_SkipsUnparsableTagAtHead references AC-2 (task0002): a
+// non-draft, non-prerelease release with an unparsable tag at the head of
+// the listing is skipped in favor of the next parseable release.
+func TestLatest_SkipsUnparsableTagAtHead(t *testing.T) {
+	pages := [][]testRelease{
+		{
+			{TagName: "nightly", Body: "n", PublishedAt: "2024-03-02T00:00:00Z"},
+			{TagName: "v3.0.0", Body: "b3", PublishedAt: "2024-03-01T00:00:00Z"},
+		},
+	}
+	srv := newMockServer(t, pages, nil)
+	defer srv.Close()
+
+	client := NewClient("test-token", srv.URL)
+	got, err := client.Latest()
+	if err != nil {
+		t.Fatalf("Latest returned error: %v", err)
+	}
+	if got.TagName != "v3.0.0" {
+		t.Errorf("Latest().TagName = %q, want %q", got.TagName, "v3.0.0")
+	}
+}
+
+// TestLatest_NoParseableCandidateIsError references AC-2 (task0002): when no
+// non-draft, non-prerelease, parseable-tag entry exists in the listing -
+// including when the only parseable tags belong to a draft and a prerelease
+// - Latest returns the existing "no releases found" error instead of a
+// filtered entry.
+func TestLatest_NoParseableCandidateIsError(t *testing.T) {
+	pages := [][]testRelease{
+		{
+			{TagName: "nightly", Body: "n", PublishedAt: "2024-03-02T00:00:00Z"},
+			{TagName: "v3.0.0", Body: "d", PublishedAt: "2024-03-01T00:00:00Z", Draft: true},
+			{TagName: "v2.9.0", Body: "b", PublishedAt: "2024-02-20T00:00:00Z", Prerelease: true},
+		},
+	}
+	srv := newMockServer(t, pages, nil)
+	defer srv.Close()
+
+	client := NewClient("test-token", srv.URL)
+	_, err := client.Latest()
+	if err == nil {
+		t.Fatal("Latest() = nil error, want error when no non-draft, non-prerelease, parseable-tag release exists")
+	}
+	if !strings.Contains(err.Error(), "no releases found") {
+		t.Errorf("Latest() error = %q, want the existing \"no releases found\" error", err.Error())
 	}
 }
 
