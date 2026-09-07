@@ -94,7 +94,7 @@ workflow:
     base_commit: 97e11f7b0acecfe45988bede93ff859ea6c23a70
     completed_at_commit: edd25e121f9c4c87764a0a9bff76ce827b1d0e51
   - id: review
-    status: pending
+    status: in_progress
     completed_at_commit: null
   - id: verify
     status: pending
@@ -151,19 +151,18 @@ tasks:
     branch: em-workflow/release-since-semver/task0003
 
 review:
-  status: pending
+  status: in_progress
   rounds_completed: 1
   plan:
-    floor: [comprehensive, architecture, spec]
-    discretionary:
-      - perspective: security
-        reason: "diff に GitHub API クライアント（bearer token 保持、外部由来のタグ文字列のパース、保存済み状態を含むエラーメッセージ）が含まれるため。NFR3（秘匿情報を漏らさないエラー）の検証先でもある"
+    floor: [comprehensive, security, performance, architecture, spec]
+    discretionary: []
     cross_validation: true
   perspectives:
-    comprehensive: completed
-    architecture: completed
-    spec: completed
-    security: completed
+    comprehensive: pending
+    security: pending
+    performance: pending
+    architecture: pending
+    spec: pending
   residual_critical_high: 0
   needs_rework: false
 
