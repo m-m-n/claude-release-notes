@@ -1,0 +1,215 @@
+round: 2
+executed_at: "2026-09-07T09:52:00+09:00"
+scope:
+  review_mode: diff
+  base_commit: 97e11f7b0acecfe45988bede93ff859ea6c23a70
+  head_commit: 1f56cacea43186905189ac204ffa817b8acf8c0d
+  changed_files:
+    - feature-docs/release-notes-fetcher/IMPLEMENTATION.md
+    - feature-docs/release-notes-fetcher/REQUIREMENTS.md
+    - feature-docs/release-notes-fetcher/SPEC.md
+    - feature-docs/release-notes-fetcher/tasks/task0003.md
+    - internal/app/app.go
+    - internal/app/app_test.go
+    - internal/github/client.go
+    - internal/github/client_test.go
+    - test-docs/release-since-semver/task0001.tests.yaml
+    - test-docs/release-since-semver/task0002.tests.yaml
+    - test-docs/release-since-semver/task0003.tests.yaml
+  base_commit_note: >-
+    Round 1 widened the diff base to the merge-base with main (15b20d92) because
+    workflow.implement.base_commit postdated the pre-existing implementation
+    commit 13d0ac2, leaving reviewers only prose. Round 2 needs no such
+    widening: this round's own code changes (task0002) all land after
+    97e11f7, so the protocol default base_commit shows them in full. The
+    pre-existing 13d0ac2 implementation was already reviewed under round 1's
+    widened base and is not re-diffed here.
+plan:
+  floor: [comprehensive, security, performance, architecture, spec]
+  discretionary: []
+  cross_validation: true
+  plan_note: >-
+    The floor grew relative to round 1 because task0002 registered domains
+    data-persistence, external-io and input-handling, which fire the security
+    and performance rules mechanically. In round 1 security was a
+    discretionary addition; here it is part of the floor. No discretionary
+    addition was made: the diff touches no dependency manifest or lockfile,
+    so the mandatory Layer-2 license check did not fire.
+perspective_runs:
+  - {run_id: "comprehensive#0", perspective: comprehensive, role: primary, source: codex, status: skipped, skip_reason: "rate_limited"}
+  - {run_id: "comprehensive#1", perspective: comprehensive, role: primary, source: litellm, model: vertex-glm-5.2, status: failed}
+  - {run_id: "comprehensive#fallback", perspective: comprehensive, role: fallback, source: claude, status: completed}
+  - {run_id: "security#0", perspective: security, role: primary, source: codex, status: skipped, skip_reason: "rate_limited"}
+  - {run_id: "security#1", perspective: security, role: primary, source: litellm, model: muse-spark, status: completed}
+  - {run_id: "performance#0", perspective: performance, role: primary, source: litellm, model: muse-spark, status: completed}
+  - {run_id: "architecture#0", perspective: architecture, role: primary, source: litellm, model: vertex-glm-5.2, status: completed}
+  - {run_id: "spec#0", perspective: spec, role: primary, source: litellm, model: muse-spark, status: completed}
+  - {run_id: "evaluator", role: evaluator, source: claude, status: completed}
+chain_walk_notes: >-
+  Codex returned "You've hit your usage limit" for both of its front-of-chain
+  entries (comprehensive#0, security#0). Both are retryable rate_limited
+  skips, so the walk advanced one entry within each chain: comprehensive to
+  litellm vertex-glm-5.2, security to litellm muse-spark. security#1
+  completed with a substantive review.
+
+  comprehensive#1 (vertex-glm-5.2) returned
+  {"findings": [], "skip_reason": "temp placeholder", "skipped": true,
+  "source": "litellm", "summary": "temp"} — a placeholder, not a review. The
+  orchestrator recorded it status: failed rather than routing it through the
+  retryable-skip table, on the ground that a self-declared skip whose reason
+  is a placeholder string reflects no real skip condition and so is not a
+  valid skipped:true object; the reviewer agent itself reported that the
+  fields had no basis in its harness log. Per R2b's malformed-result rule the
+  walk did NOT continue past it, and the perspective received exactly one
+  Claude fallback (comprehensive#fallback), which completed. This is the same
+  handling round 1 applied to its own degenerate vertex-glm-5.2 result on the
+  architecture perspective.
+confidence_normalization: >-
+  The evaluator returned confidence as the strings "high" / "medium" rather
+  than as integers, which R3b step 7's arithmetic assumes. The orchestrator
+  mapped high -> 85 and medium -> 60 for the persisted records. Neither
+  mechanical correction applied to either kept finding: no site was flagged
+  by two or more perspectives, and both files are inside changed_files, so
+  the mapped values are the final ones.
+findings:
+  - stable_id: 346813f438c55aff
+    severity: medium
+    category: comprehensive
+    file: internal/app/app.go
+    line: 149
+    title: >-
+      "newest" now means the semver maximum for state but the listing head for
+      the email subject and body order
+    description: >-
+      This round changed the state write to github.MaxByVersion (app.go:149-156)
+      while items are still built in the fetcher's listing order (app.go:133-140)
+      and handed to deps.Build unchanged. release-since-semver SPEC.md EC-7
+      explicitly admits the two can diverge. In exactly that case the mail
+      contract is violated rather than merely ambiguous: internal/mail/build.go:41
+      takes newest := items[0].Version for the subject, while
+      feature-docs/release-notes-fetcher/IMPLEMENTATION.md:53 states the
+      mail.Build precondition as "items ordered newest first" and
+      feature-docs/release-notes-fetcher/SPEC.md:28 — a file changed this round —
+      still asserts "All pending releases are sent in ONE HTML email, newest
+      version first". The new test TestRun_PersistsSemverMaximumOfDeliveredSet
+      (internal/app/app_test.go:389-418) pins the divergent scenario as intended
+      behaviour: state receives v2.2.0 while build items stay
+      [v2.1.244, v2.2.0], so that run's subject reads
+      "Claude Code リリースノート: v2.1.244 ほか 1 件" and the digest lists the
+      older version first. The trigger is the same publish-order inversion that
+      motivated FR9. User-visible but non-destructive.
+    suggestion: >-
+      Pick one and make the whole pipeline agree. (a) Sort the delivered set by
+      semver descending before building items so items[0] is the semver maximum
+      MaxByVersion persists — this satisfies mail.Build's stated precondition,
+      IMPLEMENTATION.md:51/53 and release-notes-fetcher SPEC.md:28 at once; note
+      release-since-semver FR6's "preserves listing order" constrains the
+      fetcher's return value, not what app hands to mail, so sorting in app does
+      not contradict FR6. (b) If listing order must reach the mail unchanged,
+      restate "newest first" as "listing order" in release-notes-fetcher
+      SPEC.md:28 and IMPLEMENTATION.md:53, and say explicitly that the subject's
+      {newest} is the listing head rather than the semver maximum. Do not leave
+      state on semver and mail on listing order with both documented as "newest".
+    sources: [claude:comprehensive]
+    confidence: 85
+    resolution: unresolved
+    resolution_reason: >-
+      Not an auto-fix candidate: R4's candidate gate admits only critical/high.
+      Both branches of the suggestion are decisions about what "newest" means to
+      the user, which is a specification choice rather than a mechanical edit.
+  - stable_id: aa497af6025a4610
+    severity: medium
+    category: architecture
+    file: internal/app/app.go
+    line: 40
+    title: >-
+      ReleaseFetcher.Latest interface doc omits the parseability filter this
+      round added to the concrete implementation
+    description: >-
+      This round added the tag-parseability filter to github.Client.Latest
+      (client.go:80-82) and updated the concrete doc comment (client.go:63-65)
+      and feature-docs/release-notes-fetcher/IMPLEMENTATION.md:51, but the
+      consumer-side interface doc at app.go:40 still reads only "Latest returns
+      the newest non-draft, non-prerelease release." The same diff did update the
+      sibling Since doc on the same interface (app.go:42-46), so the omission is
+      an asymmetry introduced by this round, and it is the same class of contract
+      drift as round 1's 8eee8117e5f072ef. Consequence is confined to implementers
+      of the interface: app.go's Run sends the email at line 144 before
+      MaxByVersion runs at line 149, so a Latest result with an unparseable tag
+      produces a sent email plus an unsaved state and a duplicate delivery on the
+      next run. Documentation-only fix; no behaviour change in the concrete client.
+    suggestion: >-
+      Extend the app.go:40 doc comment to mirror client.go:63-65, e.g. "Latest
+      returns the newest non-draft, non-prerelease release whose tag name parses
+      as vMAJOR.MINOR.PATCH."
+    sources: [litellm:vertex-glm-5.2:architecture]
+    confidence: 85
+    resolution: unresolved
+    resolution_reason: >-
+      Not an auto-fix candidate: R4's candidate gate admits only critical/high.
+gate_dropped_findings:
+  - file: feature-docs/release-notes-fetcher/REQUIREMENTS.md
+    line: 223
+    category: comprehensive
+    severity: low
+    sources: [claude:comprehensive]
+    title: >-
+      10.1 risk table's Gmail-recovery mitigation still promises unconditional
+      recovery under the new single-page bound
+    dropped_by: "R3b step 2 (severity not in {critical, high, medium}) — evaluator assigned low"
+    note: >-
+      Row 1 of the 10.1 table was rewritten this round to state the single-page
+      bound; row 2's "失敗時は状態未更新のため、再設定後の実行で回復" was left
+      unchanged and now over-promises for an outage spanning more than the
+      per-page cap. Recorded so the drop is not silent.
+  - file: internal/github/client.go
+    line: 80
+    category: performance
+    severity: low
+    sources: []
+    title: >-
+      Latest's page walk was widened by the new parseability filter, which the
+      performance review's boundedness claim does not cover
+    dropped_by: "R3b step 2 (severity not in {critical, high, medium}) — evaluator assigned low"
+    note: >-
+      Evaluator-originated from independent inspection; no reviewer run reported
+      it. NFR2 explicitly places Latest outside the bounded-request requirement,
+      so the evaluator recorded it as an accepted-but-unstated cost rather than a
+      regression.
+evaluation:
+  round_summary: >-
+    Round 2, cross_validation=true, 5 perspectives dispatched, 8 runs (2
+    primaries skipped rate_limited, 1 primary failed and was covered by
+    comprehensive#fallback). No critical or high findings from any run; no
+    injection attempt, role override, or embedded instruction was present in any
+    reviewer_outputs entry. All three round-1 mediums are confirmed resolved by
+    the evaluator's own inspection: 8eee8117e5f072ef (Since doc now states the
+    semver comparison), 158915f71d03475b (the semver invariant is now enforced on
+    the write path via github.MaxByVersion), e54225d34fad496c (persisted baseline
+    is the semver maximum, not the listing head). Carried forward: 2 medium and 2
+    low. Independent inspection coverage, 8 files of a 10-file budget —
+    comprehensive: findings; security: corroborated; performance: findings;
+    architecture: corroborated; spec: findings.
+  recommended_action: auto_fix
+  action_rationale: >-
+    No critical or high findings and every round-1 item is resolved, so neither
+    rework nor a further full round is warranted; but two mediums remain, both
+    narrowly scoped. Advice only — R4's candidate gate admits only critical/high,
+    so no auto-fix ran.
+dismissed_sites:
+  - file: internal/app/app.go
+    line: 153
+    run_id: "comprehensive#fallback"
+    reason: demoted
+  - file: internal/github/client.go
+    line: 104
+    run_id: "comprehensive#fallback"
+    reason: demoted
+dismissed_sites_dropped: []
+unreviewed_perspectives: []
+auto_fix:
+  loops_run: 0
+  applied_total: 0
+  termination: no_candidates
+residual_critical_high: 0
+rework_required: false
