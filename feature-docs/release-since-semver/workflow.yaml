@@ -131,9 +131,9 @@ tasks:
     domains: [api-contract, data-persistence, external-io, input-handling]
     complexity: medium
     requirements: [FR7, FR9, FR10, NFR4]
-    status: pending
+    status: in_progress
     notes: null
-    branch: null
+    branch: em-workflow/release-since-semver/task0002
   task0003:
     title: Align legacy docs with the semver-greatest baseline and parseable-only latest selection
     plan: tasks/task0003.md
@@ -146,9 +146,9 @@ tasks:
     domains: [api-contract]
     complexity: low
     requirements: [FR11]
-    status: pending
+    status: in_progress
     notes: null
-    branch: null
+    branch: em-workflow/release-since-semver/task0003
 
 review:
   status: pending
