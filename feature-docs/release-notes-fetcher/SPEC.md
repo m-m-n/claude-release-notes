@@ -34,8 +34,9 @@ As the owner, I want the very first run to process only the latest release,
 so that I do not receive a huge backlog email.
 
 **Acceptance Criteria:**
-- [ ] With no state file present, exactly the latest release is fetched,
-      translated, sent, and recorded
+- [ ] With no state file present, exactly the release the latest-release
+      query selects under its full filter is fetched, translated, sent, and
+      recorded
 
 ### US3: Failure recovery
 As the owner, I want any mid-run failure to leave the state untouched, so that
@@ -59,10 +60,13 @@ the next scheduled run retries automatically.
   newer are collected, never the whole listing. Tags that do not parse as a
   version are skipped. Drafts and prereleases are excluded. Ordering relies
   on the API's reverse-chronological listing.
-- **FR2:** Persist the last delivered release `tag_name` in
-  `${XDG_STATE_HOME:-~/.local/state}/claude-release-notes/state.json`. When the
-  state file is absent (first run), process only the latest release. Write the
-  state file only after a successful email send (write-temp + rename).
+- **FR2:** Persist the semver-greatest tag name among the releases delivered
+  in that run in
+  `${XDG_STATE_HOME:-~/.local/state}/claude-release-notes/state.json`. When
+  the state file is absent (first run), process only the release the
+  latest-release query selects, excluding drafts, prereleases, and tags that
+  do not parse. Write the state file only after a successful email send
+  (write-temp + rename).
 - **FR3:** Load configuration from
   `${XDG_CONFIG_HOME:-~/.config}/claude-release-notes/config.yaml` with keys:
   `gmail.account`, `gmail.app_password`, `mail.to`, `github.token`. Missing or
@@ -128,7 +132,7 @@ config.yaml ┘         │
         mail.Build(releases, translations) → HTML → mail.Send()
                       │ (success only)
                       ▼
-              state.Write(newestVersion)
+              state.Write(semverGreatestVersion)
 ```
 
 ### API Design
@@ -193,8 +197,9 @@ README.md                          # install & setup instructions
 - [ ] TS-1: FR1 — given a stored version and a mocked single-page API
       response, the releases that compare newer are returned newest first,
       and drafts/prereleases are skipped
-- [ ] TS-2: FR2 — first run (no state file) yields only the latest release;
-      state write is atomic and creates directories as needed
+- [ ] TS-2: FR2 — first run (no state file) yields only the release the
+      latest-release query selects under its full filter; state write is
+      atomic and creates directories as needed
 - [ ] TS-3: FR3 — valid config parses; each missing required key produces an
       error naming the key without printing values
 - [ ] TS-4: FR4 — prompt contains delimiters and all release bodies; output is
