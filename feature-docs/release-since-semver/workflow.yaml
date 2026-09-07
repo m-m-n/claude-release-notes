@@ -131,7 +131,7 @@ tasks:
     domains: [api-contract, data-persistence, external-io, input-handling]
     complexity: medium
     requirements: [FR7, FR9, FR10, NFR4]
-    status: in_progress
+    status: merged
     notes: null
     branch: em-workflow/release-since-semver/task0002
   task0003:
