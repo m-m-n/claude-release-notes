@@ -40,7 +40,8 @@ type ReleaseFetcher interface {
 	// Latest returns the newest non-draft, non-prerelease release.
 	Latest() (github.Release, error)
 	// Since returns the non-draft, non-prerelease releases newer than
-	// version, newest first, bounded to one listing page; empty slice
+	// version — newer decided by semantic-version comparison of tag
+	// names — newest first, bounded to one listing page; empty slice
 	// when up to date.
 	Since(version string) ([]github.Release, error)
 }
@@ -145,11 +146,14 @@ func Run(deps Dependencies) error {
 	}
 	logProgress(deps.Stdout, "mail: sent digest to %s", cfg.MailTo)
 
-	newest := releases[0].TagName
-	if err := deps.State.Save(newest); err != nil {
+	maxRelease, ok := github.MaxByVersion(releases)
+	if !ok {
+		return stageError(deps.Stderr, "state", fmt.Errorf("no semver-parseable release among %d delivered", len(releases)))
+	}
+	if err := deps.State.Save(maxRelease.TagName); err != nil {
 		return stageError(deps.Stderr, "state", err)
 	}
-	logProgress(deps.Stdout, "state: saved version %s", newest)
+	logProgress(deps.Stdout, "state: saved version %s", maxRelease.TagName)
 
 	return nil
 }
