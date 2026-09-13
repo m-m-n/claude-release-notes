@@ -1,5 +1,5 @@
 // Package translate turns a batch of English release-note bodies into
-// Japanese via a single claude-batch subprocess call, recovering the
+// Japanese via a single `codex exec` subprocess call, recovering the
 // per-release translations from its combined output.
 package translate
 
@@ -10,55 +10,74 @@ import (
 	"strings"
 )
 
-const defaultCommand = "claude-batch"
+// defaultCommand is the translation subprocess. Routing the request through
+// codex - and from there the local LiteLLM proxy - keeps translation off the
+// Claude subscription quota, whose weekly limit otherwise fails the run.
+const defaultCommand = "codex"
 
-// runFunc executes command with the single argument arg, writing stdin to
-// the subprocess's standard input and returning its standard output (or an
-// error, including a stderr excerpt, on failure). It exists so tests can
-// substitute a fake in place of a real subprocess call.
-type runFunc func(command, arg, stdin string) (stdout string, err error)
+// defaultArgs returns the fixed arguments passed to the command. The profile
+// and model select the LiteLLM route; the trailing "-" makes codex read the
+// prompt from stdin. A fresh slice is returned on every call so a caller
+// cannot mutate the defaults for later Translators.
+func defaultArgs() []string {
+	return []string{
+		"exec",
+		"-p", "litellm",
+		"-m", "muse-spark-contributor",
+		"--sandbox", "read-only",
+		"--skip-git-repo-check",
+		"-",
+	}
+}
+
+// runFunc executes command with args, writing stdin to the subprocess's
+// standard input and returning its standard output (or an error, including a
+// stderr excerpt, on failure). It exists so tests can substitute a fake in
+// place of a real subprocess call.
+type runFunc func(command string, args []string, stdin string) (stdout string, err error)
 
 // Translator translates a batch of release-note bodies into Japanese via a
-// single claude-batch subprocess invocation.
+// single subprocess invocation.
 type Translator struct {
 	command string
+	args    []string
 	run     runFunc
 }
 
-// NewTranslator returns a Translator that invokes command (default
-// "claude-batch" when empty) as `command -`, with the assembled prompt
-// written to its stdin.
+// NewTranslator returns a Translator that invokes command (default "codex"
+// when empty) with the fixed translation arguments, writing the assembled
+// prompt to its stdin.
 func NewTranslator(command string) *Translator {
 	if command == "" {
 		command = defaultCommand
 	}
-	return &Translator{command: command, run: runSubprocess}
+	return &Translator{command: command, args: defaultArgs(), run: runSubprocess}
 }
 
 // Translate returns one translated text per input section, in the same
-// order, obtained via a single claude-batch call. It returns an error - and
-// no translations - when the subprocess fails, produces empty output, or
-// any section cannot be recovered from the output.
+// order, obtained via a single subprocess call. It returns an error - and no
+// translations - when the subprocess fails, produces empty output, or any
+// section cannot be recovered from the output.
 func (t *Translator) Translate(sections []string) ([]string, error) {
 	prompt := buildPrompt(sections)
 
-	stdout, err := t.run(t.command, "-", prompt)
+	stdout, err := t.run(t.command, t.args, prompt)
 	if err != nil {
 		return nil, fmt.Errorf("translate: %w", err)
 	}
 
 	if strings.TrimSpace(stdout) == "" {
-		return nil, fmt.Errorf("translate: claude-batch produced empty output")
+		return nil, fmt.Errorf("translate: %s produced empty output", t.command)
 	}
 
 	return splitSections(stdout, len(sections))
 }
 
-// runSubprocess is the real runFunc: it runs command with arg, writing
+// runSubprocess is the real runFunc: it runs command with args, writing
 // stdin to the subprocess's standard input and returning its standard
 // output. A non-zero exit yields an error including a stderr excerpt.
-func runSubprocess(command, arg, stdin string) (string, error) {
-	cmd := exec.Command(command, arg)
+func runSubprocess(command string, args []string, stdin string) (string, error) {
+	cmd := exec.Command(command, args...)
 	cmd.Stdin = strings.NewReader(stdin)
 
 	var stdout, stderr bytes.Buffer
@@ -66,7 +85,7 @@ func runSubprocess(command, arg, stdin string) (string, error) {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("claude-batch failed: %w (stderr: %s)", err, strings.TrimSpace(stderr.String()))
+		return "", fmt.Errorf("%s failed: %w (stderr: %s)", command, err, strings.TrimSpace(stderr.String()))
 	}
 	return stdout.String(), nil
 }
@@ -93,9 +112,9 @@ exactly as given, unchanged. Translate only the human-readable text; leave
 the content inside inline code spans and fenced code blocks untranslated.
 `
 
-// buildPrompt assembles the full claude-batch prompt: the translation
-// instruction followed by every section wrapped in its own delimiter pair,
-// in input order.
+// buildPrompt assembles the full prompt: the translation instruction
+// followed by every section wrapped in its own delimiter pair, in input
+// order.
 func buildPrompt(sections []string) string {
 	var b strings.Builder
 	b.WriteString(promptInstruction)

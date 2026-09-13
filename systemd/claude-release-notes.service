@@ -3,5 +3,8 @@ Description=Claude Code release notes fetcher (single run)
 
 [Service]
 Type=oneshot
+# 翻訳は codex 経由で LiteLLM proxy を叩く。値は
+# ~/.config/vertex-ai-agent/.env の LITELLM_VIRTUAL_KEY を設定する。
+Environment=LITELLM_API_KEY=<your-litellm-virtual-key>
 # Set this to the actual install path of the binary.
 ExecStart=/usr/bin/claude-release-notes
