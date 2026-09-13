@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// wellFormedResponse builds a fake claude-batch stdout response containing
+// wellFormedResponse builds a fake subprocess stdout response containing
 // one delimited section per entry in translations, padded with whitespace
 // around each marker/content to exercise trimming.
 func wellFormedResponse(translations []string) string {
@@ -33,9 +33,9 @@ func TestNewTranslator_DefaultCommand(t *testing.T) {
 }
 
 func TestNewTranslator_CustomCommand(t *testing.T) {
-	tr := NewTranslator("my-fake-claude-batch")
-	if tr.command != "my-fake-claude-batch" {
-		t.Fatalf("expected command %q, got %q", "my-fake-claude-batch", tr.command)
+	tr := NewTranslator("my-fake-codex")
+	if tr.command != "my-fake-codex" {
+		t.Fatalf("expected command %q, got %q", "my-fake-codex", tr.command)
 	}
 }
 
@@ -47,7 +47,7 @@ func TestTranslate_PromptAssembly(t *testing.T) {
 
 	var capturedStdin string
 	tr := NewTranslator("fake-command")
-	tr.run = func(command, arg, stdin string) (string, error) {
+	tr.run = func(command string, args []string, stdin string) (string, error) {
 		capturedStdin = stdin
 		return wellFormedResponse([]string{"translated one", "translated two"}), nil
 	}
@@ -93,7 +93,7 @@ func TestTranslate_PromptInstructionMarkdownPreservation(t *testing.T) {
 
 	var capturedStdin string
 	tr := NewTranslator("fake-command")
-	tr.run = func(command, arg, stdin string) (string, error) {
+	tr.run = func(command string, args []string, stdin string) (string, error) {
 		capturedStdin = stdin
 		return wellFormedResponse([]string{"訳"}), nil
 	}
@@ -123,7 +123,7 @@ func TestTranslate_OutputRecovery(t *testing.T) {
 	want := []string{"訳A", "訳B", "訳C"}
 
 	tr := NewTranslator("fake-command")
-	tr.run = func(command, arg, stdin string) (string, error) {
+	tr.run = func(command string, args []string, stdin string) (string, error) {
 		return wellFormedResponse(want), nil
 	}
 
@@ -145,8 +145,8 @@ func TestTranslate_OutputRecovery(t *testing.T) {
 // yields an error; no translations are returned.
 func TestTranslate_SubprocessError(t *testing.T) {
 	tr := NewTranslator("fake-command")
-	tr.run = func(command, arg, stdin string) (string, error) {
-		return "", fmt.Errorf("claude-batch failed: %w (stderr: boom)", errors.New("exit status 1"))
+	tr.run = func(command string, args []string, stdin string) (string, error) {
+		return "", fmt.Errorf("codex failed: %w (stderr: boom)", errors.New("exit status 1"))
 	}
 
 	got, err := tr.Translate([]string{"Body"})
@@ -161,7 +161,7 @@ func TestTranslate_SubprocessError(t *testing.T) {
 // TestTranslate_EmptyOutput references AC-4: empty stdout yields an error.
 func TestTranslate_EmptyOutput(t *testing.T) {
 	tr := NewTranslator("fake-command")
-	tr.run = func(command, arg, stdin string) (string, error) {
+	tr.run = func(command string, args []string, stdin string) (string, error) {
 		return "   \n\t", nil
 	}
 
@@ -180,7 +180,7 @@ func TestTranslate_MissingDelimiter(t *testing.T) {
 	sections := []string{"Body A", "Body B"}
 
 	tr := NewTranslator("fake-command")
-	tr.run = func(command, arg, stdin string) (string, error) {
+	tr.run = func(command string, args []string, stdin string) (string, error) {
 		// Only section 1's delimiters are present; section 2 is missing.
 		return wellFormedResponse([]string{"訳A"}), nil
 	}
@@ -195,14 +195,16 @@ func TestTranslate_MissingDelimiter(t *testing.T) {
 }
 
 // TestTranslate_InvocationArgs references AC-6: the subprocess is invoked
-// with exactly the argument "-" and the prompt on stdin.
+// with the fixed translation arguments, the prompt on stdin, and "-" as the
+// final argument so the prompt is read from stdin rather than argv.
 func TestTranslate_InvocationArgs(t *testing.T) {
 	sections := []string{"Body A"}
 
-	var gotCommand, gotArg, gotStdin string
+	var gotCommand, gotStdin string
+	var gotArgs []string
 	tr := NewTranslator("fake-command-name")
-	tr.run = func(command, arg, stdin string) (string, error) {
-		gotCommand, gotArg, gotStdin = command, arg, stdin
+	tr.run = func(command string, args []string, stdin string) (string, error) {
+		gotCommand, gotArgs, gotStdin = command, args, stdin
 		return wellFormedResponse([]string{"訳A"}), nil
 	}
 
@@ -213,10 +215,52 @@ func TestTranslate_InvocationArgs(t *testing.T) {
 	if gotCommand != "fake-command-name" {
 		t.Fatalf("expected command %q, got %q", "fake-command-name", gotCommand)
 	}
-	if gotArg != "-" {
-		t.Fatalf("expected arg %q, got %q", "-", gotArg)
+	if len(gotArgs) == 0 || gotArgs[len(gotArgs)-1] != "-" {
+		t.Fatalf("expected %q as the final argument, got %v", "-", gotArgs)
 	}
 	if !strings.Contains(gotStdin, sections[0]) {
 		t.Fatalf("expected stdin to contain the section body, got %q", gotStdin)
+	}
+}
+
+// TestDefaultArgs_LiteLLMRoute pins the arguments that keep translation off
+// the Claude subscription quota: the codex "exec" subcommand, the LiteLLM
+// profile, and the model served through it. A silent change here would send
+// the run back to the quota that used to fail it.
+func TestDefaultArgs_LiteLLMRoute(t *testing.T) {
+	args := defaultArgs()
+
+	if len(args) == 0 || args[0] != "exec" {
+		t.Fatalf("expected %q as the first argument, got %v", "exec", args)
+	}
+
+	for _, pair := range []struct{ flag, value string }{
+		{"-p", "litellm"},
+		{"-m", "muse-spark-contributor"},
+	} {
+		idx := -1
+		for i, a := range args {
+			if a == pair.flag {
+				idx = i
+				break
+			}
+		}
+		if idx == -1 {
+			t.Fatalf("expected flag %q in args, got %v", pair.flag, args)
+		}
+		if idx+1 >= len(args) || args[idx+1] != pair.value {
+			t.Fatalf("expected %q %q in args, got %v", pair.flag, pair.value, args)
+		}
+	}
+}
+
+// TestDefaultArgs_NotShared checks that each call returns a fresh slice, so
+// one Translator cannot mutate the arguments of another.
+func TestDefaultArgs_NotShared(t *testing.T) {
+	first := defaultArgs()
+	first[0] = "mutated"
+
+	if second := defaultArgs(); second[0] != "exec" {
+		t.Fatalf("defaultArgs returned a shared slice: got %q after mutating an earlier result", second[0])
 	}
 }
